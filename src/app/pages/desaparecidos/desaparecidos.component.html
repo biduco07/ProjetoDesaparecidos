@@ -1,6 +1,79 @@
-<div class="flex flex-row justify-around py-3">
+<div class="flex flex-row justify-evenly py-3 pb-5">
   <div class="text-xl">Desaparecidos:</div>
   <div class="text-xl">Localizados:</div>
 </div>
+<hr class="pb-5" />
+<div class="flex flex-row">
+  <div class="w-3/12 rounded-t-lg">
+    <div
+      class="bg-gray-600 text-white py-2 text-2xl rounded-t-lg justify-normal"
+    >
+      Consulta
+    </div>
 
-<div>teste</div>
+    <div class="bg-gray-200 gap-3 h-full">
+      <div class="pt-3 px-4">
+        <p class="text-left">Nome</p>
+        <mat-form-field class="w-full" appearance="outline">
+          <input matInput type="text" class="border rounded-t-lg" />
+        </mat-form-field>
+      </div>
+
+      <div class="px-4">
+        <p class="text-left">Faixa Etária</p>
+        <mat-form-field class="w-full" appearance="outline">
+          <input
+            matInput
+            type="number"
+            min="0"
+            class="border rounded-t-lg"
+            placeholder="Idade Mínima"
+          />
+        </mat-form-field>
+        <mat-form-field class="w-full" appearance="outline">
+          <input
+            matInput
+            type="number"
+            min="0"
+            class="border rounded-t-lg"
+            placeholder="Idade Máxima"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="px-4">
+        <p class="text-left">Sexo</p>
+        <mat-radio-group
+          aria-label="Select an option"
+          class="flex flex-col text-start"
+        >
+          <mat-radio-button value="1">Masculino</mat-radio-button>
+          <mat-radio-button value="2">Feminino</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="px-4">
+        <p class="text-left">Status</p>
+        <mat-radio-group
+          aria-label="Select an option"
+          class="flex flex-col text-start"
+        >
+          <mat-radio-button value="1">Desaparecido</mat-radio-button>
+          <mat-radio-button value="2">Localizado</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="flex flex-col w-50 gap-3 mt-6">
+        <button mat-flat-button>
+          <mat-icon class="size-10">search</mat-icon>
+          Consultar
+        </button>
+
+        <button style="color: red !important" mat-raised-button>
+          <mat-icon color="warn">close</mat-icon>
+          <p>Limpar</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-9/12">testetestetestetestetesteteste</div>
+</div>
