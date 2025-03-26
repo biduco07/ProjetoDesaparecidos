@@ -10,6 +10,7 @@ export class DesaparecidosState {
   private _localizadosDesaparecidos$!: BehaviorSubject<IEstatisticas>;
   private _listaPessoas$!: BehaviorSubject<ResultadoPaginado<IPessoas>>;
   private _controlePaginacao$!: BehaviorSubject<Paginacao>;
+  private _detalhePessoa$!: BehaviorSubject<IPessoas>;
 
   constructor() {
     this._localizadosDesaparecidos$ = new BehaviorSubject<IEstatisticas>(
@@ -23,6 +24,7 @@ export class DesaparecidosState {
       page: 0,
       size: 12,
     });
+    this._detalhePessoa$ = new BehaviorSubject<IPessoas>({} as IPessoas);
   }
   // Visualizar localizadosDesaparecidos
   get localizadosDesaparecidos$(): Observable<IEstatisticas> {
@@ -55,5 +57,16 @@ export class DesaparecidosState {
   }
   set controlePaginacao(value: Paginacao) {
     this._controlePaginacao$.next(value);
+  }
+
+  // Visualizar localizadosDesaparecidos
+  get detalhePessoa$(): Observable<IPessoas> {
+    return this._detalhePessoa$.asObservable();
+  }
+  get detalhePessoa(): IPessoas {
+    return this._detalhePessoa$.value;
+  }
+  set detalhePessoa(value: IPessoas) {
+    this._detalhePessoa$.next(value);
   }
 }

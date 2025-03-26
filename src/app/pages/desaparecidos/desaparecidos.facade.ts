@@ -5,12 +5,15 @@ import { DesaparecidosState } from './state/desaparecidos.state';
 import { IEstatisticas } from './models/estatisticas.model';
 import { ResultadoPaginado } from '../../shared/paginacao/resultado-paginado';
 import { IPessoas } from './models/pessoas.model';
+import { PageEvent } from '@angular/material/paginator';
+import { Paginacao } from '../../shared/paginacao/paginacao';
 
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
   localizadosDesaparecidos$!: Observable<IEstatisticas>;
   listaPessoas$!: Observable<ResultadoPaginado<IPessoas>>;
-  detalhePessoa$!: Observable<ResultadoPaginado<IPessoas>>;
+  detalhePessoa$!: Observable<IPessoas>;
+  controlePaginacao$!: Observable<Paginacao>;
 
   constructor(
     private _api: DesaparecidosService,
@@ -19,6 +22,8 @@ export class DesaparecidosFacade {
     // Link Observables
     this.localizadosDesaparecidos$ = this._state.localizadosDesaparecidos$;
     this.listaPessoas$ = this._state.listaPessoas$;
+    this.detalhePessoa$ = this._state.detalhePessoa$;
+    this.controlePaginacao$ = this._state.controlePaginacao$;
   }
 
   loadInitialData(form: any): void {
@@ -54,6 +59,7 @@ export class DesaparecidosFacade {
     this._api.getArquivosDetalhe(id).subscribe({
       next: (res) => {
         console.log(res);
+        this._state.detalhePessoa = res;
       },
       error: (error) => {
         console.error('Erro ao consultar detalhes', error);
@@ -62,8 +68,14 @@ export class DesaparecidosFacade {
   }
 
   resetCurrentAlvo(): void {
-    /*
-    this._visualizaState.alvoSelecionado = new DadosAlvo();
-  */
+    this._state.controlePaginacao = { page: 0, size: 12 };
+  }
+
+  handlePagination(event: PageEvent, form?: any): void {
+    this._state.controlePaginacao = {
+      ...this._state.controlePaginacao,
+      page: event.pageIndex,
+    };
+    this.consultarDesaparecidos(form);
   }
 }

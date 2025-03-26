@@ -1,14 +1,16 @@
 <div class="flex flex-row justify-evenly py-3 pb-5">
+  @if(localizadosDesaparecidos){
   <div class="text-xl">
-    Desaparecidos: {{ LocalizadosDesaparecidos.quantPessoasDesaparecidas }}
+    Desaparecidos: {{ localizadosDesaparecidos.quantPessoasDesaparecidas }}
   </div>
   <div class="text-xl">
-    Localizados: {{ LocalizadosDesaparecidos.quantPessoasEncontradas }}
+    Localizados: {{ localizadosDesaparecidos.quantPessoasEncontradas }}
   </div>
+  }
 </div>
 <hr class="pb-5" />
-<div class="flex flex-row">
-  <div class="w-3/12 rounded-t-lg">
+<div class="flex flex-col md:flex-row">
+  <div class="w-full md:w-3/12 rounded-t-lg">
     <div
       class="bg-gray-600 text-white py-2 text-2xl rounded-t-lg justify-normal"
     >
@@ -73,7 +75,7 @@
           <mat-radio-button value="2">Localizado</mat-radio-button>
         </mat-radio-group>
       </div>
-      <div class="flex flex-col w-50 gap-3 mt-6">
+      <div class="flex flex-col w-6/8 gap-3 mt-6">
         <button mat-raised-button (click)="consultarDesaparecidos()">
           <mat-icon class="size-10">search</mat-icon>
           Consultar
@@ -87,45 +89,50 @@
     </form>
   </div>
 
-  <div class="w-9/12 px-2">
+  <div class="w-full md:w-9/12 px-2">
     @if(listaPessoas){
-    <div class="grid grid-cols-4 gap-3">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
       @for(lista of listaPessoas.content; track $index){
       <mat-card
         (click)="abrirDetalhes(lista.id)"
         class="example-card cursor-pointer"
         appearance="outlined"
       >
-        <mat-card-header>
-          <mat-card-title class="!text-sm !text-left">{{
-            lista?.nome
-          }}</mat-card-title>
-          <mat-card-subtitle class="!text-sm !text-left">
-            {{ lista?.idade }} Anos, {{ lista?.sexo }}
-          </mat-card-subtitle>
-        </mat-card-header>
         <img
-          mat-card-image
-          src="{{ lista?.urlFoto }}"
-          alt="Photo of a Shiba Inu"
+          [src]="lista?.urlFoto || './assets/image/semfoto.jpg'"
+          [alt]="'Imagem do indivíduo: ' + lista.nome"
+          height="128"
+          class="w-full h-60 object-cover p-2 rounded-t-lg"
         />
         <mat-card-content>
-          <span class="flex">
-            <p class="font-semibold pr-1 text-sm text-left">Data:</p>
+          <mat-card-title class="!text-sm">{{ lista?.nome }}</mat-card-title>
+          <mat-card-subtitle class="">
+            {{ lista?.idade }} Anos, {{ lista?.sexo }}
+          </mat-card-subtitle>
+          <span class="flex mt-2 -mb-2">
+            <p class="pr-1 font-semibold">Data:</p>
             {{
               lista?.ultimaOcorrencia?.dtDesaparecimento
                 | date : "dd/MM/yyyy HH:mm:ss"
             }}
           </span>
-
           <span class="flex">
             <p class="font-semibold pr-1">Local:</p>
             {{ lista?.ultimaOcorrencia?.localDesaparecimentoConcat }}
           </span>
         </mat-card-content>
       </mat-card>
+
       }
     </div>
+    <mat-paginator
+      class="w-full"
+      [pageIndex]="paginacao.page"
+      [pageSize]="paginacao.size"
+      hidePageSize
+      (page)="handlePagination($event)"
+      [length]="listaPessoas.totalElements"
+    ></mat-paginator>
     } @else{
     <div class="spinner-container">
       <mat-spinner diameter="50"></mat-spinner>

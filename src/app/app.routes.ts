@@ -9,7 +9,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'detalhes',
+    path: 'detalhes/:id',
     loadComponent: () =>
       import(
         './pages/desaparecidos/components/desaparecidos-detalhe/desaparecidos-detalhe.component'

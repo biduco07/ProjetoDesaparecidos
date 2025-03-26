@@ -19,7 +19,8 @@ import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado'
 import { IPessoas } from '../models/pessoas.model';
 import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Paginacao } from '../../../shared/paginacao/paginacao';
 @Component({
   selector: 'app-desaparecidos',
   templateUrl: './desaparecidos.component.html',
@@ -36,13 +37,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatCardModule,
     CommonModule,
     MatProgressSpinnerModule,
+    MatPaginatorModule,
   ],
 })
 export class DesaparecidosComponent {
   form!: FormGroup;
 
-  LocalizadosDesaparecidos!: IEstatisticas;
+  localizadosDesaparecidos!: IEstatisticas;
   listaPessoas!: ResultadoPaginado<IPessoas>;
+  paginacao!: Paginacao;
 
   private _unsubscribeFlag$: Subject<any> = new Subject<any>();
 
@@ -57,7 +60,7 @@ export class DesaparecidosComponent {
     this._facade.localizadosDesaparecidos$
       .pipe(takeUntil(this._unsubscribeFlag$))
       .subscribe((value: IEstatisticas) => {
-        this.LocalizadosDesaparecidos = value;
+        this.localizadosDesaparecidos = value;
       });
 
     this._facade.listaPessoas$
@@ -66,6 +69,12 @@ export class DesaparecidosComponent {
         if (value?.content) {
           this.listaPessoas = value;
         }
+      });
+
+    this._facade.controlePaginacao$
+      .pipe(takeUntil(this._unsubscribeFlag$))
+      .subscribe((value: Paginacao) => {
+        this.paginacao = value;
       });
   }
 
@@ -84,7 +93,10 @@ export class DesaparecidosComponent {
   }
 
   abrirDetalhes(id: number): void {
-    this._facade.abrirDetalhes(id);
-    this.router.navigate(['/detalhes']);
+    this.router.navigate(['/detalhes', id]);
+  }
+
+  handlePagination(event: PageEvent): void {
+    this._facade.handlePagination(event, this.form.value);
   }
 }

@@ -22,7 +22,7 @@ export class DesaparecidosService {
     );
   }
 
-  getArquivosDetalhe(id: Number): Observable<any> {
+  getArquivosDetalhe(id: number): Observable<any> {
     return this.http.get<any>(`${this.endpointAbitus}v1/pessoas/${id}`);
   }
 
