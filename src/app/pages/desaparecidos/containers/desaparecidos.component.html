@@ -14,90 +14,118 @@
     >
       Consulta
     </div>
+    <form [formGroup]="form">
+      <div class="bg-gray-200 gap-2 h-full">
+        <div class="pt-2 px-4">
+          <p class="text-left">Nome</p>
+          <mat-form-field class="w-full" appearance="outline">
+            <input
+              matInput
+              type="text"
+              formControlName="nome"
+              class="border rounded-t-lg"
+            />
+          </mat-form-field>
+        </div>
 
-    <div class="bg-gray-200 gap-2 h-full">
-      <div class="pt-2 px-4">
-        <p class="text-left">Nome</p>
-        <mat-form-field class="w-full" appearance="outline">
-          <input matInput type="text" class="border rounded-t-lg" />
-        </mat-form-field>
-      </div>
+        <div class="px-4">
+          <p class="text-left">Faixa Etária</p>
+          <mat-form-field class="w-full" appearance="outline">
+            <input
+              matInput
+              type="number"
+              formControlName="faixaIdadeInicial"
+              min="0"
+              class="border rounded-t-lg"
+              placeholder="Idade Mínima"
+            />
+          </mat-form-field>
+          <mat-form-field class="w-full" appearance="outline">
+            <input
+              matInput
+              type="number"
+              formControlName="faixaIdadeFinal"
+              min="0"
+              class="border rounded-t-lg"
+              placeholder="Idade Máxima"
+            />
+          </mat-form-field>
+        </div>
 
-      <div class="px-4">
-        <p class="text-left">Faixa Etária</p>
-        <mat-form-field class="w-full" appearance="outline">
-          <input
-            matInput
-            type="number"
-            min="0"
-            class="border rounded-t-lg"
-            placeholder="Idade Mínima"
-          />
-        </mat-form-field>
-        <mat-form-field class="w-full" appearance="outline">
-          <input
-            matInput
-            type="number"
-            min="0"
-            class="border rounded-t-lg"
-            placeholder="Idade Máxima"
-          />
-        </mat-form-field>
-      </div>
+        <div class="px-4">
+          <p class="text-left">Sexo</p>
+          <mat-radio-group
+            aria-label="Select an option"
+            class="flex flex-col text-start"
+            formControlName="sexo"
+          >
+            <mat-radio-button value="1">Masculino</mat-radio-button>
+            <mat-radio-button value="2">Feminino</mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div class="px-4 mt-2">
+          <p class="text-left">Status</p>
+          <mat-radio-group
+            aria-label="Select an option"
+            class="flex flex-col text-start"
+            formControlName="status"
+          >
+            <mat-radio-button value="1">Desaparecido</mat-radio-button>
+            <mat-radio-button value="2">Localizado</mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div class="flex flex-col w-50 gap-3 mt-6">
+          <button mat-raised-button (click)="consultarDesaparecidos()">
+            <mat-icon class="size-10">search</mat-icon>
+            Consultar
+          </button>
 
-      <div class="px-4">
-        <p class="text-left">Sexo</p>
-        <mat-radio-group
-          aria-label="Select an option"
-          class="flex flex-col text-start"
-        >
-          <mat-radio-button value="1">Masculino</mat-radio-button>
-          <mat-radio-button value="2">Feminino</mat-radio-button>
-        </mat-radio-group>
+          <button style="color: red !important" mat-raised-button>
+            <mat-icon color="warn">close</mat-icon>
+            Limpar
+          </button>
+        </div>
       </div>
-      <div class="px-4 mt-2">
-        <p class="text-left">Status</p>
-        <mat-radio-group
-          aria-label="Select an option"
-          class="flex flex-col text-start"
-        >
-          <mat-radio-button value="1">Desaparecido</mat-radio-button>
-          <mat-radio-button value="2">Localizado</mat-radio-button>
-        </mat-radio-group>
-      </div>
-      <div class="flex flex-col w-50 gap-3 mt-6">
-        <button mat-raised-button>
-          <mat-icon class="size-10">search</mat-icon>
-          Consultar
-        </button>
-
-        <button style="color: red !important" mat-raised-button>
-          <mat-icon color="warn">close</mat-icon>
-          Limpar
-        </button>
-      </div>
-    </div>
+    </form>
   </div>
 
   <div class="w-9/12 px-2">
-    <div class="grid grid-cols-4">
-      <mat-card class="example-card" appearance="outlined">
+    <div class="grid grid-cols-4 gap-3">
+      @for(lista of listaPessoas.content; track $index){
+      <mat-card
+        (click)="abrirDetalhes(lista.id)"
+        class="example-card cursor-pointer"
+        appearance="outlined"
+      >
         <mat-card-header>
-          <div mat-card-avatar class="example-header-image"></div>
-          <mat-card-title>Nome</mat-card-title>
-          <mat-card-subtitle>Idade/Sexo</mat-card-subtitle>
+          <mat-card-title class="!text-sm !text-left">{{
+            lista.nome
+          }}</mat-card-title>
+          <mat-card-subtitle class="!text-sm !text-left">
+            {{ lista.idade }} Anos, {{ lista.sexo }}
+          </mat-card-subtitle>
         </mat-card-header>
         <img
           mat-card-image
-          class="px-2"
-          src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+          src="{{ lista.urlFoto }}"
           alt="Photo of a Shiba Inu"
         />
-        <mat-card-content class="text-left mt-2">
-          <p class="font-semibold">Data:</p>
-          <p class="font-semibold">Local:</p>
+        <mat-card-content>
+          <span class="flex">
+            <p class="font-semibold pr-1 text-sm text-left">Data:</p>
+            {{
+              lista.ultimaOcorrencia.dtDesaparecimento
+                | date : "dd/MM/yyyy HH:mm:ss"
+            }}
+          </span>
+
+          <span class="flex">
+            <p class="font-semibold pr-1">Local:</p>
+            {{ lista.ultimaOcorrencia.localDesaparecimentoConcat }}
+          </span>
         </mat-card-content>
       </mat-card>
+      }
     </div>
   </div>
 </div>
