@@ -31,6 +31,12 @@ export class DesaparecidosFacade {
       next: (res) => {
         this._state.localizadosDesaparecidos = res;
       },
+      error: (error) => {
+        console.error(
+          'Erro ao buscar quantidade localizado e desaparecidos',
+          error
+        );
+      },
     });
   }
 
@@ -39,6 +45,9 @@ export class DesaparecidosFacade {
       next: (res) => {
         this._state.listaPessoas = res;
       },
+      error: (error) => {
+        console.error('Erro ao consultar desaparecidos', error);
+      },
     });
   }
   abrirDetalhes(id: number): void {
@@ -46,8 +55,10 @@ export class DesaparecidosFacade {
       next: (res) => {
         console.log(res);
       },
+      error: (error) => {
+        console.error('Erro ao consultar detalhes', error);
+      },
     });
-    console.log(id);
   }
 
   resetCurrentAlvo(): void {

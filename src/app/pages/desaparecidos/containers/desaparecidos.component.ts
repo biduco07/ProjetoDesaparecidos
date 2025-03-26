@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +18,7 @@ import { IEstatisticas } from '../models/estatisticas.model';
 import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado';
 import { IPessoas } from '../models/pessoas.model';
 import { Router } from '@angular/router';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-desaparecidos',
@@ -34,6 +35,7 @@ import { Router } from '@angular/router';
     MatIconModule,
     MatCardModule,
     CommonModule,
+    MatProgressSpinnerModule,
   ],
 })
 export class DesaparecidosComponent {
