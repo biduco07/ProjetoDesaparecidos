@@ -4,7 +4,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/desaparecidos/desaparecidos.component').then(
+      import('./pages/desaparecidos/containers/desaparecidos.component').then(
         (m) => m.DesaparecidosComponent
       ),
   },
@@ -12,7 +12,7 @@ export const routes: Routes = [
     path: ':id',
     loadComponent: () =>
       import(
-        './pages/desaparecidos-detalhe/desaparecidos-detalhe.component'
+        './pages/desaparecidos/components/desaparecidos-detalhe/desaparecidos-detalhe.component'
       ).then((m) => m.DesaparecidosDetalheComponent),
   },
 ];

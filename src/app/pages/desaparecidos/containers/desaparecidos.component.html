@@ -1,6 +1,10 @@
 <div class="flex flex-row justify-evenly py-3 pb-5">
-  <div class="text-xl">Desaparecidos:</div>
-  <div class="text-xl">Localizados:</div>
+  <div class="text-xl">
+    Desaparecidos: {{ LocalizadosDesaparecidos.quantPessoasDesaparecidas }}
+  </div>
+  <div class="text-xl">
+    Localizados: {{ LocalizadosDesaparecidos.quantPessoasEncontradas }}
+  </div>
 </div>
 <hr class="pb-5" />
 <div class="flex flex-row">
@@ -11,8 +15,8 @@
       Consulta
     </div>
 
-    <div class="bg-gray-200 gap-3 h-full">
-      <div class="pt-3 px-4">
+    <div class="bg-gray-200 gap-2 h-full">
+      <div class="pt-2 px-4">
         <p class="text-left">Nome</p>
         <mat-form-field class="w-full" appearance="outline">
           <input matInput type="text" class="border rounded-t-lg" />
@@ -51,7 +55,7 @@
           <mat-radio-button value="2">Feminino</mat-radio-button>
         </mat-radio-group>
       </div>
-      <div class="px-4">
+      <div class="px-4 mt-2">
         <p class="text-left">Status</p>
         <mat-radio-group
           aria-label="Select an option"
@@ -62,18 +66,38 @@
         </mat-radio-group>
       </div>
       <div class="flex flex-col w-50 gap-3 mt-6">
-        <button mat-flat-button>
+        <button mat-raised-button>
           <mat-icon class="size-10">search</mat-icon>
           Consultar
         </button>
 
         <button style="color: red !important" mat-raised-button>
           <mat-icon color="warn">close</mat-icon>
-          <p>Limpar</p>
+          Limpar
         </button>
       </div>
     </div>
   </div>
 
-  <div class="w-9/12">testetestetestetestetesteteste</div>
+  <div class="w-9/12 px-2">
+    <div class="grid grid-cols-4">
+      <mat-card class="example-card" appearance="outlined">
+        <mat-card-header>
+          <div mat-card-avatar class="example-header-image"></div>
+          <mat-card-title>Nome</mat-card-title>
+          <mat-card-subtitle>Idade/Sexo</mat-card-subtitle>
+        </mat-card-header>
+        <img
+          mat-card-image
+          class="px-2"
+          src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+          alt="Photo of a Shiba Inu"
+        />
+        <mat-card-content class="text-left mt-2">
+          <p class="font-semibold">Data:</p>
+          <p class="font-semibold">Local:</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
 </div>
