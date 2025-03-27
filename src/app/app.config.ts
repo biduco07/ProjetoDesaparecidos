@@ -1,5 +1,10 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  PreloadAllModules,
+  provideRouter,
+  withInMemoryScrolling,
+  withPreloading,
+} from '@angular/router';
 
 import { routes } from './app.routes';
 import {
@@ -11,7 +16,13 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withPreloading(PreloadAllModules),
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+      })
+    ),
     provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch()), // Habilita Fetch API
   ],

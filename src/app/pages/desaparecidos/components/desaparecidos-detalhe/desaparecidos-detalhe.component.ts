@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { DesaparecidosFacade } from '../../desaparecidos.facade';
 import { Subject, takeUntil } from 'rxjs';
 import { IPessoas } from '../../models/pessoas.model';
@@ -15,11 +15,11 @@ import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-deta
   templateUrl: './desaparecidos-detalhe.component.html',
   styleUrl: './desaparecidos-detalhe.component.scss',
 })
-export class DesaparecidosDetalheComponent {
+export class DesaparecidosDetalheComponent implements OnDestroy {
   id!: number;
   pessoa!: IPessoas;
   dataPercorrida!: any;
-  private _unsubscribeFlag$: Subject<any> = new Subject<any>();
+  private _unsubscribeFlag$ = new Subject<any>();
 
   constructor(
     private dialog: MatDialog,
@@ -27,17 +27,20 @@ export class DesaparecidosDetalheComponent {
     private route: ActivatedRoute
   ) {
     this.id = Number(this.route?.snapshot?.paramMap?.get('id'));
-
     this._facade.abrirDetalhes(this.id);
 
     this._facade.detalhePessoa$
       .pipe(takeUntil(this._unsubscribeFlag$))
       .subscribe((value: IPessoas) => {
-        if (value) {
+        if (Object.keys(value).length > 0) {
           this.pessoa = value;
           this.convertToToday(this.pessoa?.ultimaOcorrencia?.dtDesaparecimento);
         }
       });
+  }
+  ngOnDestroy(): void {
+    this._unsubscribeFlag$.next(null);
+    this._unsubscribeFlag$.complete();
   }
 
   convertToToday(date: any): void {

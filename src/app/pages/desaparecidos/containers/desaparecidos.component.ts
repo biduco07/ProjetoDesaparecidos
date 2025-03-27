@@ -99,4 +99,7 @@ export class DesaparecidosComponent {
   handlePagination(event: PageEvent): void {
     this._facade.handlePagination(event, this.form.value);
   }
+  resetForm() {
+    this.criarForm();
+  }
 }

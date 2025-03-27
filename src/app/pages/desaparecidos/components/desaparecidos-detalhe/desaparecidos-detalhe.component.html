@@ -69,12 +69,10 @@
       <span class="pr-1 font-semibold">Informações adicionais:</span>
       {{ pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao }}
     </div>
-    }
 
     <div class="py-2 font-bold text-xl text-red-500">
       Desaparecido Há {{ dataPercorrida }} Dias.
     </div>
-
     <button
       class="!bg-red-600 w-60 py-3"
       (click)="openDialog()"
@@ -84,5 +82,6 @@
     </button>
 
     <div class="my-3 text-xl font-semibold">Compartilhe:</div>
+    }
   </div>
 </div>

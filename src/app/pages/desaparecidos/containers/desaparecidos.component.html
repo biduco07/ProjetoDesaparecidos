@@ -60,8 +60,8 @@
           class="flex flex-col text-start"
           formControlName="sexo"
         >
-          <mat-radio-button value="1">Masculino</mat-radio-button>
-          <mat-radio-button value="2">Feminino</mat-radio-button>
+          <mat-radio-button value="MASCULINO">Masculino</mat-radio-button>
+          <mat-radio-button value="FEMININO">Feminino</mat-radio-button>
         </mat-radio-group>
       </div>
       <div class="px-4 mt-2">
@@ -71,8 +71,8 @@
           class="flex flex-col text-start"
           formControlName="status"
         >
-          <mat-radio-button value="1">Desaparecido</mat-radio-button>
-          <mat-radio-button value="2">Localizado</mat-radio-button>
+          <mat-radio-button value="DESAPARECIDO">Desaparecido</mat-radio-button>
+          <mat-radio-button value="LOCALIZADO">Localizado</mat-radio-button>
         </mat-radio-group>
       </div>
       <div class="flex flex-col w-6/8 gap-3 mt-6">
@@ -81,7 +81,11 @@
           Consultar
         </button>
 
-        <button style="color: red !important" mat-raised-button>
+        <button
+          style="color: red !important"
+          (click)="resetForm()"
+          mat-raised-button
+        >
           <mat-icon color="warn">close</mat-icon>
           Limpar
         </button>
@@ -129,7 +133,6 @@
       class="w-full"
       [pageIndex]="paginacao.page"
       [pageSize]="paginacao.size"
-      hidePageSize
       (page)="handlePagination($event)"
       [length]="listaPessoas.totalElements"
     ></mat-paginator>

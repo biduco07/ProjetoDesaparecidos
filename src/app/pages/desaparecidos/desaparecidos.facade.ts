@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { DesaparecidosService } from '../../core/desaparecidos.service';
 import { DesaparecidosState } from './state/desaparecidos.state';
 import { IEstatisticas } from './models/estatisticas.model';
@@ -67,15 +67,18 @@ export class DesaparecidosFacade {
     });
   }
 
-  resetCurrentAlvo(): void {
-    this._state.controlePaginacao = { page: 0, size: 12 };
-  }
-
   handlePagination(event: PageEvent, form?: any): void {
     this._state.controlePaginacao = {
       ...this._state.controlePaginacao,
       page: event.pageIndex,
     };
     this.consultarDesaparecidos(form);
+  }
+
+  resetConsulta(): void {
+    this._state.controlePaginacao = { page: 0, size: 12 };
+  }
+  resetDetalhes(): void {
+    //this._state.detalhePessoa = ;
   }
 }
