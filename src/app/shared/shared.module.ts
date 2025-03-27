@@ -10,8 +10,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { provideNgxMask } from 'ngx-mask';
-import { DesaparecidosComponent } from '../pages/desaparecidos/desaparecidos.component';
-import { DesaparecidosDetalheComponent } from '../components/desaparecidos-detalhe/desaparecidos-detalhe.component';
+import { DesaparecidosComponent } from '../pages/desaparecidos/containers/desaparecidos.component';
+import { DesaparecidosDetalheComponent } from '../pages/desaparecidos/components/desaparecidos-detalhe/desaparecidos-detalhe.component';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @NgModule({
   declarations: [],
@@ -31,6 +32,7 @@ import { DesaparecidosDetalheComponent } from '../components/desaparecidos-detal
   ],
   providers: [
     provideNgxMask(),
+    provideNativeDateAdapter(),
     DesaparecidosComponent,
     DesaparecidosDetalheComponent,
   ],

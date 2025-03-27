@@ -7,7 +7,7 @@ import { Paginacao } from '../shared/paginacao/paginacao';
   providedIn: 'root',
 })
 export class DesaparecidosService {
-  endpointAbitus: string = ' https://abitus-api.geia.vip/';
+  endpointAbitus: string = ' https://abitus-api.pjc.mt.gov.br/';
   constructor(private http: HttpClient) {}
 
   getArquivos(paginacao?: Paginacao, form?: any): Observable<any> {
