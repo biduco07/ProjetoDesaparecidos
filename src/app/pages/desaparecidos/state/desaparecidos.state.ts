@@ -4,6 +4,7 @@ import { IEstatisticas } from '../models/estatisticas.model';
 import { Paginacao } from '../../../shared/paginacao/paginacao';
 import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado';
 import { IPessoas } from '../models/pessoas.model';
+import { IConsulta } from '../models/consulta.model';
 
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosState {
@@ -11,6 +12,7 @@ export class DesaparecidosState {
   private _listaPessoas$!: BehaviorSubject<ResultadoPaginado<IPessoas>>;
   private _controlePaginacao$!: BehaviorSubject<Paginacao>;
   private _detalhePessoa$!: BehaviorSubject<IPessoas>;
+  private _formularioConsulta$!: BehaviorSubject<IConsulta>;
 
   constructor() {
     this._localizadosDesaparecidos$ = new BehaviorSubject<IEstatisticas>(
@@ -25,6 +27,7 @@ export class DesaparecidosState {
       size: 12,
     });
     this._detalhePessoa$ = new BehaviorSubject<IPessoas>({} as IPessoas);
+    this._formularioConsulta$ = new BehaviorSubject<IConsulta>({} as IConsulta);
   }
   // Visualizar localizadosDesaparecidos
   get localizadosDesaparecidos$(): Observable<IEstatisticas> {
@@ -68,5 +71,16 @@ export class DesaparecidosState {
   }
   set detalhePessoa(value: IPessoas) {
     this._detalhePessoa$.next(value);
+  }
+
+  // Visualizar localizadosDesaparecidos
+  get formularioConsulta$(): Observable<IConsulta> {
+    return this._formularioConsulta$.asObservable();
+  }
+  get formularioConsulta(): IConsulta {
+    return this._formularioConsulta$.value;
+  }
+  set formularioConsulta(value: IConsulta) {
+    this._formularioConsulta$.next(value);
   }
 }
