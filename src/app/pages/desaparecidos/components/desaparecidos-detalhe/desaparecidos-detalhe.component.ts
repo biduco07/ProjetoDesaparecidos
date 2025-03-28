@@ -54,6 +54,10 @@ export class DesaparecidosDetalheComponent implements OnDestroy {
 
   openDialog(): void {
     this.dialog.open(DesaparecidosDetalheDialogComponent, {
+      data: {
+        id: this.pessoa?.ultimaOcorrencia?.ocoId,
+        descricao: this.pessoa?.nome,
+      },
       width: '600px', // Tamanho do diálogo
     });
   }

@@ -1,15 +1,19 @@
-import { DialogRef } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, Inject, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialogModule } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { DesaparecidosFacade } from '../../../desaparecidos.facade';
@@ -23,8 +27,7 @@ import {
   provideNativeDateAdapter,
 } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { Observable } from 'rxjs';
-
+import * as moment from 'moment';
 @Component({
   selector: 'desaparecidos-detalhe-dialog',
   imports: [
@@ -38,10 +41,12 @@ import { Observable } from 'rxjs';
     MatIconModule,
     MatDatepickerModule,
     MatFormFieldModule,
+    MatDialogModule,
   ],
   standalone: true,
   providers: [provideNativeDateAdapter()],
   templateUrl: './desaparecidos-detalhe-dialog.component.html',
+  styleUrl: './desaparecidos-detalhe-dialog.component.scss',
 })
 export class DesaparecidosDetalheDialogComponent {
   form!: FormGroup;
@@ -56,9 +61,10 @@ export class DesaparecidosDetalheDialogComponent {
   private readonly _locale = signal(inject<unknown>(MAT_DATE_LOCALE));
 
   constructor(
-    private dialogRef: DialogRef,
     private _fb: FormBuilder,
-    private _facade: DesaparecidosFacade
+    private _facade: DesaparecidosFacade,
+    public dialogRef: MatDialogRef<DesaparecidosDetalheDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { id: number; descricao: string } //
   ) {
     const today = new Date();
     this.dateNow = today.toISOString().split('T')[0];
@@ -71,9 +77,11 @@ export class DesaparecidosDetalheDialogComponent {
 
   criarForm(): void {
     this.form = this._fb.group({
-      nome: [''],
-      data: [this.dateNow],
-      Imagem: [],
+      informacao: ['', [Validators.required]],
+      data: [this.dateNow, [Validators.required]],
+      ocoId: [this.data.id],
+      files: [],
+      descricao: [this.data.descricao],
     });
   }
   // Função chamada quando o usuário seleciona as imagens
@@ -98,7 +106,38 @@ export class DesaparecidosDetalheDialogComponent {
     }
   }
 
-  onSend(): void {}
+  removeImage(index: number) {
+    this.savedImages.splice(index, 1); // Remove a imagem do array pelo índice
+  }
+
+  onSend(): void {
+    let formData: FormData = new FormData();
+    let tempDate: moment.Moment = moment.utc(this.form.value.data).local();
+    if (this.form.value.informacao.length == 0) {
+      /*
+      Swal.fire(
+        'Há campos em branco!',
+        'Campo Informação obrigatório!',
+        'warning'
+      );*/
+    } else {
+      formData.append('ocoId', this.form.value.ocoId);
+      formData.append('descricao', this.form.value.descricao);
+      formData.append('informacao', this.form.value.informacao);
+      if (this.form.value.data.length == 0) {
+        formData.append('data', this.form.value.data);
+      } else {
+        formData.append('data', tempDate.format('YYYY-MM-DD'));
+      }
+      for (let i = 0; i < this.selectedFiles.length; i++) {
+        formData.append('files', this.selectedFiles[i]);
+      }
+      console.log(this.form.value.data);
+      this.dialogRef.close();
+      this.form.reset();
+      this._facade.postOcorrencia(formData);
+    }
+  }
 
   onClose(): void {
     this.dialogRef.close();

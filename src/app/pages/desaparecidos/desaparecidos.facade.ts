@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { DesaparecidosService } from '../../core/desaparecidos.service';
 import { DesaparecidosState } from './state/desaparecidos.state';
 import { IEstatisticas } from './models/estatisticas.model';
@@ -75,10 +75,16 @@ export class DesaparecidosFacade {
     this.consultarDesaparecidos(form);
   }
 
+  postOcorrencia(form: FormData): void {
+    this._api.postOcorrencia(form).subscribe({
+      next: (res) => {},
+      error: (error) => {
+        console.error('Erro ao adicionar informações', error);
+      },
+    });
+  }
+
   resetConsulta(): void {
     this._state.controlePaginacao = { page: 0, size: 12 };
-  }
-  resetDetalhes(): void {
-    //this._state.detalhePessoa = ;
   }
 }

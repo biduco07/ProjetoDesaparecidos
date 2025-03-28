@@ -7,7 +7,7 @@ import { Paginacao } from '../shared/paginacao/paginacao';
   providedIn: 'root',
 })
 export class DesaparecidosService {
-  endpointAbitus: string = ' https://abitus-api.pjc.mt.gov.br/';
+  endpointAbitus: string = ' https://abitus-api.geia.vip/';
   constructor(private http: HttpClient) {}
 
   getArquivos(paginacao?: Paginacao, form?: any): Observable<any> {
@@ -32,19 +32,10 @@ export class DesaparecidosService {
     );
   }
 
-  /*
-  postAssinarStart(assinatura: any): Observable<any> {
+  postOcorrencia(form: FormData): Observable<any> {
     return this.http.post<any>(
-      ${env.apiAssinaturaDigital}/assinar/start,
-      assinatura
+      this.endpointAbitus + 'v1/ocorrencias/informacoes-desaparecido',
+      form
     );
   }
-
-  postAssinarFinish(assinatura: any): Observable<any> {
-    return this.http.post<any>(
-      ${env.apiAssinaturaDigital}/assinar/finish,
-      assinatura
-    );
-  }
-    */
 }

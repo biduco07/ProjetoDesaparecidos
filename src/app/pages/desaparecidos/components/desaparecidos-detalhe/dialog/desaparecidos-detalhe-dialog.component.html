@@ -1,11 +1,11 @@
-<div mat-dialog-title class="font-semibold flex items-center">Formulário</div>
+<div mat-dialog-title class="font-semibold flex text-center">Formulário</div>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="gap-2 h-full">
     <div class="pt-2 px-4">
       <mat-form-field class="w-full">
         <mat-label>Informação</mat-label>
-        <input matInput type="text" formControlName="nome" />
+        <input matInput type="text" formControlName="informacao" />
       </mat-form-field>
     </div>
     <div class="pt-2 px-4">
@@ -22,7 +22,7 @@
         mat-raised-button
         color="green"
         (click)="fileInput.click()"
-        class="ml-auto !bg-green-500"
+        class="ml-auto !bg-green-600"
       >
         <mat-icon [ngStyle]="{ color: 'white' }">cloud_upload</mat-icon>
         <div class="text-white">Enviar Imagem</div>
@@ -36,12 +36,17 @@
         multiple
       />
     </div>
+
     <div class="pt-2 px-4">
       <div *ngIf="savedImages.length">
         <h3>Imagens Salvas:</h3>
         <div class="flex flex-wrap gap-2">
-          <div *ngFor="let image of savedImages; let i = index">
+          <div
+            *ngFor="let image of savedImages; let i = index"
+            class="relative"
+          >
             <img [src]="image" alt="Imagem {{ i + 1 }}" width="200" />
+            <button (click)="removeImage(i)" class="delete-btn">X</button>
           </div>
         </div>
       </div>
@@ -51,7 +56,7 @@
 
 <div mat-dialog-actions class="flex w-full justify-between">
   <button mat-raised-button (click)="onClose()" class="ml-auto">Fechar</button>
-  <button mat-raised-button (click)="onSend()" class="ml-auto !bg-green-500">
+  <button mat-raised-button (click)="onSend()" class="ml-auto !bg-green-600">
     <div class="text-white">Enviar</div>
   </button>
 </div>

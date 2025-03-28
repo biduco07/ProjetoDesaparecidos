@@ -76,18 +76,18 @@
         </mat-radio-group>
       </div>
       <div class="flex flex-col w-6/8 gap-3 mt-6">
-        <button mat-raised-button (click)="consultarDesaparecidos()">
-          <mat-icon class="size-10">search</mat-icon>
-          Consultar
+        <button
+          mat-raised-button
+          (click)="consultarDesaparecidos()"
+          class="!bg-green-600"
+        >
+          <mat-icon class="size-10 !text-white">search</mat-icon>
+          <span class="!text-white"> Consultar </span>
         </button>
 
-        <button
-          style="color: red !important"
-          (click)="resetForm()"
-          mat-raised-button
-        >
-          <mat-icon color="warn">close</mat-icon>
-          Limpar
+        <button class="!bg-red-600" (click)="resetForm()" mat-raised-button>
+          <mat-icon class="size-10 !text-white">close</mat-icon>
+          <span class="!text-white"> Limpar </span>
         </button>
       </div>
     </form>

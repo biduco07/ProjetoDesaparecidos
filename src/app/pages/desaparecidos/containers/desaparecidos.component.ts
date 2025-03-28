@@ -55,7 +55,9 @@ export class DesaparecidosComponent {
     private router: Router
   ) {
     this.criarForm();
-    this._facade.loadInitialData(this.form.value);
+    if (!this.listaPessoas) {
+      this._facade.loadInitialData(this.form.value);
+    }
 
     this._facade.localizadosDesaparecidos$
       .pipe(takeUntil(this._unsubscribeFlag$))
