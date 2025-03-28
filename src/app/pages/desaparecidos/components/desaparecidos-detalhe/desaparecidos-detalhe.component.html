@@ -1,0 +1,87 @@
+@if (pessoa?.ultimaOcorrencia?.dataLocalizacao) {
+<span class="bg-green-600 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
+  >Localizado</span
+>
+} @else{
+<span class="bg-red-600 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
+  >Desaparecido</span
+>
+}
+
+<div
+  [ngClass]="
+    pessoa?.ultimaOcorrencia?.dataLocalizacao
+      ? 'border-green-600'
+      : 'border-red-600'
+  "
+  class="flex flex-row py-2 border-4 rounded-lg px-2"
+>
+  <div>
+    <img
+      [src]="pessoa?.urlFoto || './assets/image/semfoto.jpg'"
+      [alt]="'Imagem do indivíduo: ' + pessoa?.nome"
+      height="128"
+      class="w-full h-120 object-cover p-2"
+    />
+  </div>
+  <div class="flex flex-col text-left mt-1">
+    <div class="font-semibold text-2xl">{{ pessoa?.nome }}</div>
+    <div class="font-semibold text-xl">
+      {{ pessoa?.idade }} Anos - {{ pessoa?.sexo }}
+    </div>
+    <hr class="my-2" />
+
+    <div class="font-semibold text-xl my-2">Dados sobre o Desaparecimento</div>
+    @if(pessoa?.ultimaOcorrencia?.dataLocalizacao){
+    <div class="flex flex-row">
+      <span class="pr-1 font-semibold">Data Localizado:</span>
+      {{ pessoa?.ultimaOcorrencia?.dataLocalizacao | date : "dd/MM/yyyy " }}
+    </div>
+
+    <div class="flex flex-row">
+      <span class="pr-1 font-semibold">Encontrado Vivo?</span>
+      {{ pessoa?.ultimaOcorrencia?.encontradoVivo ? "Sim" : "Não" }}
+    </div>
+    } @else {
+
+    <div class="flex flex-row">
+      <span class="pr-1 font-semibold">Data:</span>
+      {{
+        pessoa?.ultimaOcorrencia?.dtDesaparecimento
+          | date : "dd/MM/yyyy HH:mm:ss"
+      }}
+    </div>
+
+    <div class="flex flex-row">
+      <span class="pr-1 font-semibold">Local:</span>
+      {{ pessoa?.ultimaOcorrencia?.localDesaparecimentoConcat }}
+    </div>
+
+    <div class="flex flex-row">
+      <span class="pr-1 font-semibold">Vestimenta:</span>
+      {{
+        pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
+          ?.vestimentasDesaparecido
+      }}
+    </div>
+
+    <div class="flex flex-row">
+      <span class="pr-1 font-semibold">Informações adicionais:</span>
+      {{ pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao }}
+    </div>
+
+    <div class="py-2 font-bold text-xl text-red-500">
+      Desaparecido Há {{ dataPercorrida }} Dias.
+    </div>
+    <button
+      class="!bg-red-600 w-60 py-3"
+      (click)="openDialog()"
+      mat-raised-button
+    >
+      <span class="text-white">Encontrou Essa Pessoa?</span>
+    </button>
+
+    <div class="my-3 text-xl font-semibold">Compartilhe:</div>
+    }
+  </div>
+</div>

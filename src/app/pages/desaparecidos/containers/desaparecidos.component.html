@@ -1,0 +1,145 @@
+<div class="flex flex-row justify-evenly py-3 pb-5">
+  @if(localizadosDesaparecidos){
+  <div class="text-xl">
+    Desaparecidos: {{ localizadosDesaparecidos.quantPessoasDesaparecidas }}
+  </div>
+  <div class="text-xl">
+    Localizados: {{ localizadosDesaparecidos.quantPessoasEncontradas }}
+  </div>
+  }
+</div>
+<hr class="pb-5" />
+<div class="flex flex-col md:flex-row">
+  <div class="w-full md:w-3/12 rounded-t-lg">
+    <div
+      class="bg-gray-600 text-white py-2 text-2xl rounded-t-lg justify-normal"
+    >
+      Consulta
+    </div>
+    <form [formGroup]="form" class="bg-gray-200 gap-2 h-full">
+      <div class="pt-2 px-4">
+        <p class="text-left">Nome</p>
+        <mat-form-field class="w-full" appearance="outline">
+          <input
+            matInput
+            type="text"
+            formControlName="nome"
+            class="border rounded-t-lg"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="px-4">
+        <p class="text-left">Faixa Etária</p>
+        <mat-form-field class="w-full" appearance="outline">
+          <input
+            matInput
+            type="number"
+            formControlName="faixaIdadeInicial"
+            min="0"
+            class="border rounded-t-lg"
+            placeholder="Idade Mínima"
+          />
+        </mat-form-field>
+        <mat-form-field class="w-full" appearance="outline">
+          <input
+            matInput
+            type="number"
+            formControlName="faixaIdadeFinal"
+            min="0"
+            class="border rounded-t-lg"
+            placeholder="Idade Máxima"
+          />
+        </mat-form-field>
+      </div>
+
+      <div class="px-4">
+        <p class="text-left">Sexo</p>
+        <mat-radio-group
+          aria-label="Select an option"
+          class="flex flex-col text-start"
+          formControlName="sexo"
+        >
+          <mat-radio-button value="MASCULINO">Masculino</mat-radio-button>
+          <mat-radio-button value="FEMININO">Feminino</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="px-4 mt-2">
+        <p class="text-left">Status</p>
+        <mat-radio-group
+          aria-label="Select an option"
+          class="flex flex-col text-start"
+          formControlName="status"
+        >
+          <mat-radio-button value="DESAPARECIDO">Desaparecido</mat-radio-button>
+          <mat-radio-button value="LOCALIZADO">Localizado</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="flex flex-col w-6/8 gap-3 mt-6">
+        <button
+          mat-raised-button
+          (click)="consultarDesaparecidos()"
+          class="!bg-green-600"
+        >
+          <mat-icon class="size-10 !text-white">search</mat-icon>
+          <span class="!text-white"> Consultar </span>
+        </button>
+
+        <button class="!bg-red-600" (click)="resetForm()" mat-raised-button>
+          <mat-icon class="size-10 !text-white">close</mat-icon>
+          <span class="!text-white"> Limpar </span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="w-full md:w-9/12 px-2">
+    @if(listaPessoas){
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+      @for(lista of listaPessoas.content; track $index){
+      <mat-card
+        (click)="abrirDetalhes(lista.id)"
+        class="example-card cursor-pointer"
+        appearance="outlined"
+      >
+        <img
+          [src]="lista?.urlFoto || './assets/image/semfoto.jpg'"
+          [alt]="'Imagem do indivíduo: ' + lista.nome"
+          height="128"
+          class="w-full h-60 object-cover p-2 rounded-t-lg"
+        />
+        <mat-card-content>
+          <mat-card-title class="!text-sm">{{ lista?.nome }}</mat-card-title>
+          <mat-card-subtitle class="">
+            {{ lista?.idade }} Anos, {{ lista?.sexo }}
+          </mat-card-subtitle>
+          <span class="flex mt-2 -mb-2">
+            <p class="pr-1 font-semibold">Data:</p>
+            {{
+              lista?.ultimaOcorrencia?.dtDesaparecimento
+                | date : "dd/MM/yyyy HH:mm:ss"
+            }}
+          </span>
+          <span class="flex">
+            <p class="font-semibold pr-1">Local:</p>
+            {{ lista?.ultimaOcorrencia?.localDesaparecimentoConcat }}
+          </span>
+        </mat-card-content>
+      </mat-card>
+
+      }
+    </div>
+    <mat-paginator
+      class="w-full"
+      [pageIndex]="paginacao.page"
+      [pageSize]="paginacao.size"
+      (page)="handlePagination($event)"
+      [length]="listaPessoas.totalElements"
+    ></mat-paginator>
+    } @else{
+    <div class="spinner-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,17 @@
+.mat-form-field {
+  background-color: white !important;
+}
+mat-card-title {
+  font-size: large !important;
+}
+
+.spinner-container {
+  position: fixed; /* Usa 'fixed' para posicionar em relação à tela */
+  top: 50%; /* Centraliza na vertical */
+  left: 50%; /* Centraliza na horizontal */
+  transform: translate(
+    -50%,
+    -50%
+  ); /* Ajusta a posição para garantir o centro exato */
+  z-index: 9999; /* Garante que o spinner fique acima de outros elementos */
+}
