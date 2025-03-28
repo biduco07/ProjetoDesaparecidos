@@ -7,6 +7,7 @@ import { ResultadoPaginado } from '../../shared/paginacao/resultado-paginado';
 import { IPessoas } from './models/pessoas.model';
 import { PageEvent } from '@angular/material/paginator';
 import { Paginacao } from '../../shared/paginacao/paginacao';
+import { AlertService } from '../../core/alert.service';
 
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
@@ -17,7 +18,8 @@ export class DesaparecidosFacade {
 
   constructor(
     private _api: DesaparecidosService,
-    private _state: DesaparecidosState
+    private _state: DesaparecidosState,
+    private _alert: AlertService
   ) {
     // Link Observables
     this.localizadosDesaparecidos$ = this._state.localizadosDesaparecidos$;
@@ -77,9 +79,11 @@ export class DesaparecidosFacade {
 
   postOcorrencia(form: FormData): void {
     this._api.postOcorrencia(form).subscribe({
-      next: (res) => {},
+      next: (res) => {
+        this._alert.showSuccess('Informações Adicionada com Sucesso.');
+      },
       error: (error) => {
-        console.error('Erro ao adicionar informações', error);
+        this._alert.showError('Erro ao Adicionar Informações.');
       },
     });
   }

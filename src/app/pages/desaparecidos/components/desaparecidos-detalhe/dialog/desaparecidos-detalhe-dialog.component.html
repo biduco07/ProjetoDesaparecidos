@@ -11,22 +11,23 @@
     <div class="pt-2 px-4">
       <mat-form-field class="w-50">
         <mat-label>Data Localizado</mat-label>
-        <input formControlName="data" matInput [matDatepicker]="dp" />
+        <input matInput formControlName="data" matInput [matDatepicker]="dp" />
         <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
         <mat-datepicker #dp></mat-datepicker>
       </mat-form-field>
     </div>
-
-    <div class="pt-2 px-4">
+    <div class="pt-2 px-4 flex flex-col">
       <button
         mat-raised-button
         color="green"
         (click)="fileInput.click()"
-        class="ml-auto !bg-green-600"
+        class="mr-auto !bg-green-600"
       >
         <mat-icon [ngStyle]="{ color: 'white' }">cloud_upload</mat-icon>
         <div class="text-white">Enviar Imagem</div>
       </button>
+      <mat-hint class="text-xs">PNG, JPG, JPEG - 3MB!</mat-hint>
+
       <input
         #fileInput
         type="file"

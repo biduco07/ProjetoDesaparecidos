@@ -50,15 +50,9 @@ import * as moment from 'moment';
 })
 export class DesaparecidosDetalheDialogComponent {
   form!: FormGroup;
-  dateNow: string;
 
   savedImages: string[] = []; // Array para armazenar imagens localmente
   selectedFiles: File[] = []; // Array para armazenar os arquivos selecionados
-
-  private readonly _adapter =
-    inject<DateAdapter<unknown, unknown>>(DateAdapter);
-  private readonly _intl = inject(MatDatepickerIntl);
-  private readonly _locale = signal(inject<unknown>(MAT_DATE_LOCALE));
 
   constructor(
     private _fb: FormBuilder,
@@ -66,19 +60,13 @@ export class DesaparecidosDetalheDialogComponent {
     public dialogRef: MatDialogRef<DesaparecidosDetalheDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { id: number; descricao: string } //
   ) {
-    const today = new Date();
-    this.dateNow = today.toISOString().split('T')[0];
-
     this.criarForm();
-
-    this._locale.set('fr');
-    this._adapter.setLocale(this._locale());
   }
 
   criarForm(): void {
     this.form = this._fb.group({
       informacao: ['', [Validators.required]],
-      data: [this.dateNow, [Validators.required]],
+      data: ['', [Validators.required]],
       ocoId: [this.data.id],
       files: [],
       descricao: [this.data.descricao],
