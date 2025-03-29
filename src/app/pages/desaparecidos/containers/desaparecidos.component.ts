@@ -56,7 +56,6 @@ export class DesaparecidosComponent {
     private _fb: FormBuilder,
     private router: Router
   ) {
-    debugger;
     this.criarForm();
     this._facade.loadInitialData();
 
@@ -83,7 +82,6 @@ export class DesaparecidosComponent {
     this._facade.formularioConsulta$
       .pipe(takeUntil(this._unsubscribeFlag$))
       .subscribe((value: IConsulta) => {
-        debugger;
         if (value) {
           this.formularioConsulta = value;
           this.criarForm();
@@ -108,14 +106,15 @@ export class DesaparecidosComponent {
   }
 
   abrirDetalhes(id: number): void {
-    this.router.navigate(['/detalhes', id]);
+    this._facade.getIdDetalhes(id);
+    this.router.navigate(['/detalhe']);
   }
 
   handlePagination(event: PageEvent): void {
     this._facade.handlePagination(event);
   }
   resetForm() {
-    this.criarForm();
+    this.form.reset();
     this.consultarDesaparecidos();
   }
 }

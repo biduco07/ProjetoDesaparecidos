@@ -13,6 +13,7 @@ export class DesaparecidosState {
   private _controlePaginacao$!: BehaviorSubject<Paginacao>;
   private _detalhePessoa$!: BehaviorSubject<IPessoas>;
   private _formularioConsulta$!: BehaviorSubject<IConsulta>;
+  private _idDetalhe$!: BehaviorSubject<number>;
 
   constructor() {
     this._localizadosDesaparecidos$ = new BehaviorSubject<IEstatisticas>(
@@ -28,6 +29,7 @@ export class DesaparecidosState {
     });
     this._detalhePessoa$ = new BehaviorSubject<IPessoas>({} as IPessoas);
     this._formularioConsulta$ = new BehaviorSubject<IConsulta>({} as IConsulta);
+    this._idDetalhe$ = new BehaviorSubject<number>({} as number);
   }
   // Visualizar localizadosDesaparecidos
   get localizadosDesaparecidos$(): Observable<IEstatisticas> {
@@ -82,5 +84,16 @@ export class DesaparecidosState {
   }
   set formularioConsulta(value: IConsulta) {
     this._formularioConsulta$.next(value);
+  }
+
+  // Visualizar localizadosDesaparecidos
+  get idDetalhe$(): Observable<number> {
+    return this._idDetalhe$.asObservable();
+  }
+  get idDetalhe(): number {
+    return this._idDetalhe$.value;
+  }
+  set idDetalhe(value: number) {
+    this._idDetalhe$.next(value);
   }
 }

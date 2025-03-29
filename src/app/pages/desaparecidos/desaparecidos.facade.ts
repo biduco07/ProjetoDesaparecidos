@@ -17,6 +17,7 @@ export class DesaparecidosFacade {
   detalhePessoa$!: Observable<IPessoas>;
   controlePaginacao$!: Observable<Paginacao>;
   formularioConsulta$!: Observable<IConsulta>;
+  idDetalhe$!: Observable<number>;
 
   constructor(
     private _api: DesaparecidosService,
@@ -29,6 +30,7 @@ export class DesaparecidosFacade {
     this.detalhePessoa$ = this._state.detalhePessoa$;
     this.controlePaginacao$ = this._state.controlePaginacao$;
     this.formularioConsulta$ = this._state.formularioConsulta$;
+    this.idDetalhe$ = this._state.idDetalhe$;
   }
 
   loadInitialData(): void {
@@ -68,7 +70,6 @@ export class DesaparecidosFacade {
   abrirDetalhes(id: number): void {
     this._api.getArquivosDetalhe(id).subscribe({
       next: (res) => {
-        console.log(res);
         this._state.detalhePessoa = res;
       },
       error: (error) => {
@@ -102,5 +103,10 @@ export class DesaparecidosFacade {
 
   resetPagination(): void {
     this._state.controlePaginacao = { page: 0, size: 12 };
+  }
+
+  getIdDetalhes(id: number): void {
+    this._state.idDetalhe = id;
+    this.abrirDetalhes(id);
   }
 }
