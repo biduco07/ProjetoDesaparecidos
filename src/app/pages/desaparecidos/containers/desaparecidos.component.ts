@@ -17,7 +17,6 @@ import { CommonModule } from '@angular/common';
 import { IEstatisticas } from '../models/estatisticas.model';
 import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado';
 import { IPessoas } from '../models/pessoas.model';
-import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Paginacao } from '../../../shared/paginacao/paginacao';
@@ -51,11 +50,7 @@ export class DesaparecidosComponent {
 
   private _unsubscribeFlag$: Subject<any> = new Subject<any>();
 
-  constructor(
-    private _facade: DesaparecidosFacade,
-    private _fb: FormBuilder,
-    private router: Router
-  ) {
+  constructor(private _facade: DesaparecidosFacade, private _fb: FormBuilder) {
     this.criarForm();
     this._facade.loadInitialData();
 
@@ -107,7 +102,6 @@ export class DesaparecidosComponent {
 
   abrirDetalhes(id: number): void {
     this._facade.getIdDetalhes(id);
-    this.router.navigate(['/detalhe']);
   }
 
   handlePagination(event: PageEvent): void {

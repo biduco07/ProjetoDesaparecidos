@@ -9,6 +9,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { Paginacao } from '../../shared/paginacao/paginacao';
 import { AlertService } from '../../core/alert.service';
 import { IConsulta } from './models/consulta.model';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
@@ -22,7 +23,8 @@ export class DesaparecidosFacade {
   constructor(
     private _api: DesaparecidosService,
     private _state: DesaparecidosState,
-    private _alert: AlertService
+    private _alert: AlertService,
+    private _router: Router
   ) {
     // Link Observables
     this.localizadosDesaparecidos$ = this._state.localizadosDesaparecidos$;
@@ -71,6 +73,7 @@ export class DesaparecidosFacade {
     this._api.getArquivosDetalhe(id).subscribe({
       next: (res) => {
         this._state.detalhePessoa = res;
+        this._router.navigate(['/detalhe']);
       },
       error: (error) => {
         console.error('Erro ao consultar detalhes', error);
