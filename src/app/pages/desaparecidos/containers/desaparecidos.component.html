@@ -18,26 +18,25 @@
     </div>
     <form [formGroup]="form" class="bg-gray-200 gap-2 h-full">
       <div class="pt-2 px-4">
-        <p class="text-left">Nome</p>
+        <span class="text-left">Nome</span>
         <mat-form-field class="w-full" appearance="outline">
           <input
             matInput
             type="text"
             formControlName="nome"
-            class="border rounded-t-lg"
+            class="!uppercase"
           />
         </mat-form-field>
       </div>
 
       <div class="px-4">
-        <p class="text-left">Faixa Etária</p>
+        <span class="text-left">Faixa Etária</span>
         <mat-form-field class="w-full" appearance="outline">
           <input
             matInput
             type="number"
             formControlName="faixaIdadeInicial"
             min="0"
-            class="border rounded-t-lg"
             placeholder="Idade Mínima"
           />
         </mat-form-field>
@@ -47,7 +46,6 @@
             type="number"
             formControlName="faixaIdadeFinal"
             min="0"
-            class="border rounded-t-lg"
             placeholder="Idade Máxima"
           />
         </mat-form-field>
@@ -56,7 +54,7 @@
       <div class="px-4">
         <p class="text-left">Sexo</p>
         <mat-radio-group
-          aria-label="Select an option"
+          aria-label="Selecione uma opção"
           class="flex flex-col text-start"
           formControlName="sexo"
         >
@@ -67,7 +65,7 @@
       <div class="px-4 mt-2">
         <p class="text-left">Status</p>
         <mat-radio-group
-          aria-label="Select an option"
+          aria-label="Selecione uma opção"
           class="flex flex-col text-start"
           formControlName="status"
         >
@@ -103,7 +101,7 @@
         appearance="outlined"
       >
         <img
-          [src]="lista?.urlFoto || './assets/image/semfoto.jpg'"
+          [src]="lista?.urlFoto || './assets/semfoto.jpg'"
           [alt]="'Imagem do indivíduo: ' + lista.nome"
           height="128"
           class="w-full h-60 object-cover p-2 rounded-t-lg"

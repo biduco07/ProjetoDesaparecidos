@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, inject, signal } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -17,17 +17,12 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { DesaparecidosFacade } from '../../../desaparecidos.facade';
-import {
-  MatDatepickerIntl,
-  MatDatepickerModule,
-} from '@angular/material/datepicker';
-import {
-  DateAdapter,
-  MAT_DATE_LOCALE,
-  provideNativeDateAdapter,
-} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import * as moment from 'moment';
+import { NgxMaskDirective } from 'ngx-mask';
+import { AlertService } from '../../../../../core/alert.service';
+
 @Component({
   selector: 'desaparecidos-detalhe-dialog',
   imports: [
@@ -42,9 +37,9 @@ import * as moment from 'moment';
     MatDatepickerModule,
     MatFormFieldModule,
     MatDialogModule,
+    NgxMaskDirective,
   ],
   standalone: true,
-  providers: [provideNativeDateAdapter()],
   templateUrl: './desaparecidos-detalhe-dialog.component.html',
   styleUrl: './desaparecidos-detalhe-dialog.component.scss',
 })
@@ -57,6 +52,7 @@ export class DesaparecidosDetalheDialogComponent {
   constructor(
     private _fb: FormBuilder,
     private _facade: DesaparecidosFacade,
+    private _alert: AlertService,
     public dialogRef: MatDialogRef<DesaparecidosDetalheDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { id: number; descricao: string } //
   ) {
@@ -89,8 +85,6 @@ export class DesaparecidosDetalheDialogComponent {
         // Salvar o arquivo na lista de arquivos selecionados
         this.selectedFiles.push(file);
       });
-
-      console.log('Imagens selecionadas:', this.selectedFiles);
     }
   }
 
@@ -99,28 +93,20 @@ export class DesaparecidosDetalheDialogComponent {
   }
 
   onSend(): void {
+    debugger;
     let formData: FormData = new FormData();
-    let tempDate: moment.Moment = moment.utc(this.form.value.data).local();
+    const dataConvertida = this.convertDate(this.form.value.data);
     if (this.form.value.informacao.length == 0) {
-      /*
-      Swal.fire(
-        'Há campos em branco!',
-        'Campo Informação obrigatório!',
-        'warning'
-      );*/
+      this._alert.showError('Campo Informação obrigatório!');
     } else {
       formData.append('ocoId', this.form.value.ocoId);
       formData.append('descricao', this.form.value.descricao);
       formData.append('informacao', this.form.value.informacao);
-      if (this.form.value.data.length == 0) {
-        formData.append('data', this.form.value.data);
-      } else {
-        formData.append('data', tempDate.format('YYYY-MM-DD'));
-      }
+      formData.append('data', dataConvertida);
+      debugger;
       for (let i = 0; i < this.selectedFiles.length; i++) {
         formData.append('files', this.selectedFiles[i]);
       }
-      console.log(this.form.value.data);
       this.dialogRef.close();
       this.form.reset();
       this._facade.postOcorrencia(formData);
@@ -129,5 +115,13 @@ export class DesaparecidosDetalheDialogComponent {
 
   onClose(): void {
     this.dialogRef.close();
+  }
+  //conversão de data.
+  convertDate(input: string): string {
+    debugger;
+    const day = input.substring(0, 2);
+    const month = input.substring(2, 4);
+    const year = input.substring(4, 8);
+    return `${year}-${month}-${day}`; // Formato yyyy-dd-mm
   }
 }

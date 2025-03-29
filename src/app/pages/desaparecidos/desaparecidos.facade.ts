@@ -8,6 +8,7 @@ import { IPessoas } from './models/pessoas.model';
 import { PageEvent } from '@angular/material/paginator';
 import { Paginacao } from '../../shared/paginacao/paginacao';
 import { AlertService } from '../../core/alert.service';
+import { IConsulta } from './models/consulta.model';
 
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
@@ -15,6 +16,8 @@ export class DesaparecidosFacade {
   listaPessoas$!: Observable<ResultadoPaginado<IPessoas>>;
   detalhePessoa$!: Observable<IPessoas>;
   controlePaginacao$!: Observable<Paginacao>;
+  formularioConsulta$!: Observable<IConsulta>;
+  idDetalhe$!: Observable<number>;
 
   constructor(
     private _api: DesaparecidosService,
@@ -26,10 +29,12 @@ export class DesaparecidosFacade {
     this.listaPessoas$ = this._state.listaPessoas$;
     this.detalhePessoa$ = this._state.detalhePessoa$;
     this.controlePaginacao$ = this._state.controlePaginacao$;
+    this.formularioConsulta$ = this._state.formularioConsulta$;
+    this.idDetalhe$ = this._state.idDetalhe$;
   }
 
-  loadInitialData(form: any): void {
-    this.consultarDesaparecidos(form);
+  loadInitialData(): void {
+    this.consultarDesaparecidos();
     this.consultarEstatisticas();
   }
 
@@ -47,20 +52,24 @@ export class DesaparecidosFacade {
     });
   }
 
-  consultarDesaparecidos(form?: any): void {
-    this._api.getArquivos(this._state.controlePaginacao, form).subscribe({
-      next: (res) => {
-        this._state.listaPessoas = res;
-      },
-      error: (error) => {
-        console.error('Erro ao consultar desaparecidos', error);
-      },
-    });
+  consultarDesaparecidos(): void {
+    this._api
+      .getArquivos(
+        this._state.controlePaginacao,
+        this._state.formularioConsulta
+      )
+      .subscribe({
+        next: (res) => {
+          this._state.listaPessoas = res;
+        },
+        error: (error) => {
+          console.error('Erro ao consultar desaparecidos', error);
+        },
+      });
   }
   abrirDetalhes(id: number): void {
     this._api.getArquivosDetalhe(id).subscribe({
       next: (res) => {
-        console.log(res);
         this._state.detalhePessoa = res;
       },
       error: (error) => {
@@ -69,12 +78,12 @@ export class DesaparecidosFacade {
     });
   }
 
-  handlePagination(event: PageEvent, form?: any): void {
+  handlePagination(event: PageEvent): void {
     this._state.controlePaginacao = {
       ...this._state.controlePaginacao,
       page: event.pageIndex,
     };
-    this.consultarDesaparecidos(form);
+    this.consultarDesaparecidos();
   }
 
   postOcorrencia(form: FormData): void {
@@ -88,7 +97,16 @@ export class DesaparecidosFacade {
     });
   }
 
-  resetConsulta(): void {
+  adicionarFormularioState(form: IConsulta): void {
+    this._state.formularioConsulta = form;
+  }
+
+  resetPagination(): void {
     this._state.controlePaginacao = { page: 0, size: 12 };
+  }
+
+  getIdDetalhes(id: number): void {
+    this._state.idDetalhe = id;
+    this.abrirDetalhes(id);
   }
 }

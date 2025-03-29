@@ -3,7 +3,7 @@ import { DesaparecidosFacade } from '../../desaparecidos.facade';
 import { Subject, takeUntil } from 'rxjs';
 import { IPessoas } from '../../models/pessoas.model';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -24,10 +24,17 @@ export class DesaparecidosDetalheComponent implements OnDestroy {
   constructor(
     private dialog: MatDialog,
     private _facade: DesaparecidosFacade,
-    private route: ActivatedRoute
+    private router: Router
   ) {
-    this.id = Number(this.route?.snapshot?.paramMap?.get('id'));
-    this._facade.abrirDetalhes(this.id);
+    this._facade.idDetalhe$
+      .pipe(takeUntil(this._unsubscribeFlag$))
+      .subscribe((value: number) => {
+        if (!isNaN(Number(value))) {
+          this.id = value;
+        } else {
+          this.router.navigate(['/']);
+        }
+      });
 
     this._facade.detalhePessoa$
       .pipe(takeUntil(this._unsubscribeFlag$))

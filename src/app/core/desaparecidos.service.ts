@@ -13,8 +13,8 @@ export class DesaparecidosService {
   getArquivos(paginacao?: Paginacao, form?: any): Observable<any> {
     return this.http.get<any>(
       `${this.endpointAbitus}v1/pessoas/aberto/filtro?faixaIdadeFinal=${
-        form?.faixaIdadeFinal
-      }&faixaIdadeInicial=${form?.faixaIdadeInicial}&nome=${
+        form?.faixaIdadeFinal || 0
+      }&faixaIdadeInicial=${form?.faixaIdadeInicial || 0}&nome=${
         form?.nome || ''
       }&porPagina=12&sexo=${form?.sexo}&status=${form?.status}&pagina=${
         paginacao?.page || '0'

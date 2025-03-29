@@ -21,6 +21,7 @@ import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Paginacao } from '../../../shared/paginacao/paginacao';
+import { IConsulta } from '../models/consulta.model';
 @Component({
   selector: 'app-desaparecidos',
   templateUrl: './desaparecidos.component.html',
@@ -46,6 +47,7 @@ export class DesaparecidosComponent {
   localizadosDesaparecidos!: IEstatisticas;
   listaPessoas!: ResultadoPaginado<IPessoas>;
   paginacao!: Paginacao;
+  formularioConsulta!: IConsulta;
 
   private _unsubscribeFlag$: Subject<any> = new Subject<any>();
 
@@ -55,9 +57,7 @@ export class DesaparecidosComponent {
     private router: Router
   ) {
     this.criarForm();
-    if (!this.listaPessoas) {
-      this._facade.loadInitialData(this.form.value);
-    }
+    this._facade.loadInitialData();
 
     this._facade.localizadosDesaparecidos$
       .pipe(takeUntil(this._unsubscribeFlag$))
@@ -78,30 +78,43 @@ export class DesaparecidosComponent {
       .subscribe((value: Paginacao) => {
         this.paginacao = value;
       });
+
+    this._facade.formularioConsulta$
+      .pipe(takeUntil(this._unsubscribeFlag$))
+      .subscribe((value: IConsulta) => {
+        if (value) {
+          this.formularioConsulta = value;
+          this.criarForm();
+        }
+      });
   }
 
   criarForm(): void {
     this.form = this._fb.group({
-      nome: [''],
-      faixaIdadeInicial: [0],
-      faixaIdadeFinal: [0],
-      sexo: [''],
-      status: [''],
+      nome: [this.formularioConsulta?.nome || ''],
+      faixaIdadeInicial: [this.formularioConsulta?.faixaIdadeInicial || ''],
+      faixaIdadeFinal: [this.formularioConsulta?.faixaIdadeFinal || ''],
+      sexo: [this.formularioConsulta?.sexo || ''],
+      status: [this.formularioConsulta?.status || ''],
     });
   }
 
   consultarDesaparecidos(): void {
-    this._facade.consultarDesaparecidos(this.form.value);
+    this._facade.adicionarFormularioState(this.form.value);
+    this._facade.resetPagination();
+    this._facade.consultarDesaparecidos();
   }
 
   abrirDetalhes(id: number): void {
-    this.router.navigate(['/detalhes', id]);
+    this._facade.getIdDetalhes(id);
+    this.router.navigate(['/detalhe']);
   }
 
   handlePagination(event: PageEvent): void {
-    this._facade.handlePagination(event, this.form.value);
+    this._facade.handlePagination(event);
   }
   resetForm() {
-    this.criarForm();
+    this.form.reset();
+    this.consultarDesaparecidos();
   }
 }

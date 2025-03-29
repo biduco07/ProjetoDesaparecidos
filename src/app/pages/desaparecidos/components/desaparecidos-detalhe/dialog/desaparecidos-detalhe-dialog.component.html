@@ -11,9 +11,15 @@
     <div class="pt-2 px-4">
       <mat-form-field class="w-50">
         <mat-label>Data Localizado</mat-label>
-        <input matInput formControlName="data" matInput [matDatepicker]="dp" />
-        <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
-        <mat-datepicker #dp></mat-datepicker>
+
+        <input
+          matInput
+          mask="00/00/0000"
+          placeholder="dd/mm/aaaa"
+          type="text"
+          formControlName="data"
+          dropcharacterspecial="false"
+        />
       </mat-form-field>
     </div>
     <div class="pt-2 px-4 flex flex-col">
