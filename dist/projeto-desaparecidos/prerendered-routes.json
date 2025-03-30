@@ -1,6 +1,6 @@
 {
   "routes": {
-    "/": {},
-    "/detalhe": {}
+    "/projeto-desaparecidos": {},
+    "/projeto-desaparecidos/detalhe": {}
   }
 }
