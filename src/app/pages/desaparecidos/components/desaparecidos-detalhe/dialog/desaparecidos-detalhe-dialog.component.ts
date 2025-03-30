@@ -93,7 +93,6 @@ export class DesaparecidosDetalheDialogComponent {
   }
 
   onSend(): void {
-    debugger;
     let formData: FormData = new FormData();
     const dataConvertida = this.convertDate(this.form.value.data);
     if (this.form.value.informacao.length == 0) {
@@ -103,7 +102,6 @@ export class DesaparecidosDetalheDialogComponent {
       formData.append('descricao', this.form.value.descricao);
       formData.append('informacao', this.form.value.informacao);
       formData.append('data', dataConvertida);
-      debugger;
       for (let i = 0; i < this.selectedFiles.length; i++) {
         formData.append('files', this.selectedFiles[i]);
       }
@@ -118,7 +116,6 @@ export class DesaparecidosDetalheDialogComponent {
   }
   //conversão de data.
   convertDate(input: string): string {
-    debugger;
     const day = input.substring(0, 2);
     const month = input.substring(2, 4);
     const year = input.substring(4, 8);
