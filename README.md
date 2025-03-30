@@ -5,9 +5,9 @@
 ## Dados De Inscrição
 
 - **Nome:** Pedro Henrique Veloso Silva de Melo
-- 📱 **Telefone:** (65)98111-8169
-- ✉️ **Email:** pedrohenriquevelososilvademelo@gmail.com
-- 💼 **Vaga:** Front-End Sênior
+- **Telefone:** (65)98111-8169
+- **Email:** pedrohenriquevelososilvademelo@gmail.com
+- **Vaga:** Front-End Sênior
 
 ## 🛠 Tecnologias Utilizadas
 
