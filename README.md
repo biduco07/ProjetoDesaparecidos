@@ -25,6 +25,10 @@
 - Angular CLI (versão 19.2.4)
 - Tailwindcss (versão 4)
 
+## Demo do Projeto
+
+- https://biduco07.github.io/ProjetoDesaparecidos/
+
 ## 📥 Instalação
 
 1. Clone este repositório:
