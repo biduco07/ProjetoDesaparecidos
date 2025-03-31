@@ -69,12 +69,12 @@ Com o docker instalado na maquina, Para subir o ambiente (caso já tenha feito a
 3. Utilize o comando para carregar a imagem do docker:
 
    ```sh
-   docker load -i ProjetoDesaparecidos.tar
+   docker load -i projeto-desaparecidos.tar
    ```
 
 4. Para levantar o container é só utilizar o comando:
    ```sh
-   docker container run -d -it -p 80:80 ProjetoDesaparecidos
+   docker container run -d -it -p 80:80 projeto-desaparecidos
    ```
 
 A aplicação estará disponível em `http://localhost/` ou `http://127.0.0.1/`.
