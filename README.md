@@ -93,10 +93,9 @@ A aplicação fica disponível em `http://localhost:4200/`.
 
 ### Docker
 
-Com o Docker instalado, gere o build e a imagem e suba o container:
+O `Dockerfile` é multi-stage: a primeira etapa (Node) instala as dependências com `npm ci` e gera o build; a segunda (`nginx:alpine`) serve apenas os arquivos estáticos com o `nginx.conf` do projeto. Não é preciso ter Node instalado na máquina.
 
 ```sh
-npm run build
 docker build -t projeto-desaparecidos .
 docker run -d -p 8080:80 --name projeto-desaparecidos projeto-desaparecidos
 ```
