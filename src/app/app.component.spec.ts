@@ -35,7 +35,7 @@ describe('AppComponent', () => {
   it('volta para a página inicial ao clicar no brasão', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const router = TestBed.inject(Router);
-    const navigate = spyOn(router, 'navigate').and.resolveTo(true);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
 
     (fixture.nativeElement as HTMLElement)

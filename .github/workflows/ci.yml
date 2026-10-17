@@ -32,7 +32,7 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Testes (Chrome headless)
+      - name: Testes (Vitest + jsdom)
         run: npm run test:ci
 
       - name: Build de produção

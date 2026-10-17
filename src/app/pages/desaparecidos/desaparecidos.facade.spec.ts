@@ -1,3 +1,4 @@
+import type { Mocked } from 'vitest';
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -26,25 +27,30 @@ describe('DesaparecidosFacade', () => {
 
   let facade: DesaparecidosFacade;
   let state: DesaparecidosState;
-  let api: jasmine.SpyObj<DesaparecidosService>;
-  let alert: jasmine.SpyObj<AlertService>;
-  let router: jasmine.SpyObj<Router>;
+  let api: Mocked<
+    Pick<
+      DesaparecidosService,
+      | 'getArquivos'
+      | 'getArquivosDetalhe'
+      | 'getEstatisticas'
+      | 'postOcorrencia'
+    >
+  >;
+  let alert: Mocked<Pick<AlertService, 'showSuccess' | 'showError'>>;
+  let router: Mocked<Pick<Router, 'navigate'>>;
 
   beforeEach(() => {
-    api = jasmine.createSpyObj<DesaparecidosService>('DesaparecidosService', [
-      'getArquivos',
-      'getArquivosDetalhe',
-      'getEstatisticas',
-      'postOcorrencia',
-    ]);
-    api.getArquivos.and.returnValue(of(pagina));
-    api.getEstatisticas.and.returnValue(of(estatisticas));
-    alert = jasmine.createSpyObj<AlertService>('AlertService', [
-      'showSuccess',
-      'showError',
-    ]);
-    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
-    router.navigate.and.resolveTo(true);
+    api = {
+      getArquivos: vi.fn(),
+      getArquivosDetalhe: vi.fn(),
+      getEstatisticas: vi.fn(),
+      postOcorrencia: vi.fn(),
+    };
+    api.getArquivos.mockReturnValue(of(pagina));
+    api.getEstatisticas.mockReturnValue(of(estatisticas));
+    alert = { showSuccess: vi.fn(), showError: vi.fn() };
+    router = { navigate: vi.fn() };
+    router.navigate.mockResolvedValue(true);
 
     configurar('browser');
   });
@@ -77,7 +83,7 @@ describe('DesaparecidosFacade', () => {
 
       facade.loadInitialData();
 
-      expect(api.getArquivos).toHaveBeenCalledOnceWith(
+      expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
         { page: 0, size: 12 },
         state.formularioConsulta
       );
@@ -99,8 +105,8 @@ describe('DesaparecidosFacade', () => {
     });
 
     it('mantém a lista e publica uma mensagem amigável quando a consulta falha', () => {
-      const erro = spyOn(console, 'error');
-      api.getArquivos.and.returnValue(throwError(() => new Error('offline')));
+      const erro = vi.spyOn(console, 'error').mockReturnValue(undefined);
+      api.getArquivos.mockReturnValue(throwError(() => new Error('offline')));
       const listaAntes = state.listaPessoas;
       let erroEmitido: string | null | undefined;
       facade.erroConsulta$.subscribe((v) => (erroEmitido = v));
@@ -123,7 +129,7 @@ describe('DesaparecidosFacade', () => {
   });
 
   describe('tentar de novo', () => {
-    beforeEach(() => spyOn(console, 'error'));
+    beforeEach(() => vi.spyOn(console, 'error').mockReturnValue(undefined));
 
     it('refaz a consulta com a página e os filtros atuais', () => {
       const filtros = { nome: 'ANA' } as IConsulta;
@@ -134,7 +140,7 @@ describe('DesaparecidosFacade', () => {
 
       facade.tentarNovamente();
 
-      expect(api.getArquivos).toHaveBeenCalledOnceWith(
+      expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
         { page: 3, size: 12 },
         filtros
       );
@@ -143,11 +149,11 @@ describe('DesaparecidosFacade', () => {
     });
 
     it('recarrega as estatísticas quando elas também não carregaram', () => {
-      api.getEstatisticas.and.returnValue(
+      api.getEstatisticas.mockReturnValue(
         throwError(() => new Error('offline'))
       );
       facade.consultarEstatisticas();
-      api.getEstatisticas.and.returnValue(of(estatisticas));
+      api.getEstatisticas.mockReturnValue(of(estatisticas));
 
       facade.tentarNovamente();
 
@@ -169,7 +175,7 @@ describe('DesaparecidosFacade', () => {
       facade.handlePagination({ pageIndex: 2, pageSize: 12 } as PageEvent);
 
       expect(state.controlePaginacao).toEqual({ page: 2, size: 12 });
-      expect(api.getArquivos).toHaveBeenCalledOnceWith(
+      expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
         { page: 2, size: 12 },
         state.formularioConsulta
       );
@@ -201,7 +207,7 @@ describe('DesaparecidosFacade', () => {
       facade.consultarDesaparecidos();
 
       expect(state.formularioConsulta).toEqual(filtros);
-      expect(api.getArquivos).toHaveBeenCalledOnceWith(
+      expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
         { page: 0, size: 12 },
         filtros
       );
@@ -213,7 +219,7 @@ describe('DesaparecidosFacade', () => {
 
       facade.handlePagination({ pageIndex: 1, pageSize: 12 } as PageEvent);
 
-      expect(api.getArquivos).toHaveBeenCalledOnceWith(
+      expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
         { page: 1, size: 12 },
         filtros
       );
@@ -223,20 +229,20 @@ describe('DesaparecidosFacade', () => {
   describe('detalhe', () => {
     it('guarda o id, carrega a pessoa e navega para /detalhe', () => {
       const pessoa = { id: 7, nome: 'MARIA' } as IPessoas;
-      api.getArquivosDetalhe.and.returnValue(of(pessoa));
+      api.getArquivosDetalhe.mockReturnValue(of(pessoa));
 
       facade.getIdDetalhes(7);
 
       expect(state.idDetalhe).toBe(7);
-      expect(api.getArquivosDetalhe).toHaveBeenCalledOnceWith(7);
+      expect(api.getArquivosDetalhe).toHaveBeenCalledExactlyOnceWith(7);
       expect(state.detalhePessoa).toEqual(pessoa);
-      expect(router.navigate).toHaveBeenCalledOnceWith(['/detalhe']);
+      expect(router.navigate).toHaveBeenCalledExactlyOnceWith(['/detalhe']);
     });
   });
 
   describe('envio de informações', () => {
     it('exibe mensagem de sucesso quando a API aceita o envio', () => {
-      api.postOcorrencia.and.returnValue(of({}));
+      api.postOcorrencia.mockReturnValue(of({}));
 
       facade.postOcorrencia(new FormData());
 
@@ -245,7 +251,7 @@ describe('DesaparecidosFacade', () => {
     });
 
     it('exibe mensagem de erro quando a API rejeita o envio', () => {
-      api.postOcorrencia.and.returnValue(throwError(() => new Error('400')));
+      api.postOcorrencia.mockReturnValue(throwError(() => new Error('400')));
 
       facade.postOcorrencia(new FormData());
 

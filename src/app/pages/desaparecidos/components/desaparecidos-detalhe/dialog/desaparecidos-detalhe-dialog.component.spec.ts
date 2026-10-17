@@ -1,3 +1,4 @@
+import type { Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { provideNgxMask } from 'ngx-mask';
@@ -18,26 +19,18 @@ function eventoDeSelecao(arquivos: File[]): Event {
 describe('DesaparecidosDetalheDialogComponent', () => {
   let component: DesaparecidosDetalheDialogComponent;
   let fixture: ComponentFixture<DesaparecidosDetalheDialogComponent>;
-  let facade: jasmine.SpyObj<DesaparecidosFacade>;
+  let facade: Mocked<Pick<DesaparecidosFacade, 'postOcorrencia'>>;
 
   beforeEach(async () => {
-    facade = jasmine.createSpyObj<DesaparecidosFacade>('DesaparecidosFacade', [
-      'postOcorrencia',
-    ]);
+    facade = { postOcorrencia: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [DesaparecidosDetalheDialogComponent],
       providers: [
         provideNgxMask(),
         { provide: DesaparecidosFacade, useValue: facade },
-        {
-          provide: AlertService,
-          useValue: jasmine.createSpyObj('AlertService', ['showError']),
-        },
-        {
-          provide: MatDialogRef,
-          useValue: jasmine.createSpyObj('MatDialogRef', ['close']),
-        },
+        { provide: AlertService, useValue: { showError: vi.fn() } },
+        { provide: MatDialogRef, useValue: { close: vi.fn() } },
         { provide: MAT_DIALOG_DATA, useValue: { id: 99, descricao: 'FULANO' } },
       ],
     }).compileComponents();
@@ -48,12 +41,16 @@ describe('DesaparecidosDetalheDialogComponent', () => {
   });
 
   function preencherFormulario(): void {
-    component.form.patchValue({ informacao: 'Visto no centro', data: '10012024' });
+    component.form.patchValue({
+      informacao: 'Visto no centro',
+      data: '10012024',
+    });
   }
 
   function arquivosEnviados(): File[] {
-    const formData = facade.postOcorrencia.calls.mostRecent().args[0];
-    return formData.getAll('files') as File[];
+    expect(facade.postOcorrencia).toHaveBeenCalled();
+    const [formData] = facade.postOcorrencia.mock.lastCall ?? [];
+    return (formData?.getAll('files') ?? []) as File[];
   }
 
   it('should create', () => {
