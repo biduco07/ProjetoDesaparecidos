@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": " https://abitus-api.geia.vip/",
+    "target": "https://abitus-api.geia.vip/",
     "secure": false,
     "changeOrigin": true
   }
