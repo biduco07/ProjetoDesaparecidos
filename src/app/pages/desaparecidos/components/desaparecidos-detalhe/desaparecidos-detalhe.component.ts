@@ -18,8 +18,8 @@ import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-deta
 export class DesaparecidosDetalheComponent implements OnDestroy {
   id!: number;
   pessoa!: IPessoas;
-  dataPercorrida!: any;
-  private _unsubscribeFlag$ = new Subject<any>();
+  dataPercorrida!: number;
+  private _unsubscribeFlag$ = new Subject<void>();
 
   constructor(
     private dialog: MatDialog,
@@ -46,12 +46,12 @@ export class DesaparecidosDetalheComponent implements OnDestroy {
       });
   }
   ngOnDestroy(): void {
-    this._unsubscribeFlag$.next(null);
+    this._unsubscribeFlag$.next();
     this._unsubscribeFlag$.complete();
   }
 
-  convertToToday(date: any): void {
-    const parseDataLong = Date.parse(date);
+  convertToToday(date: Date | string): void {
+    const parseDataLong = new Date(date).getTime();
     const dateNow = Date.now();
     this.dataPercorrida = dateNow - parseDataLong;
     this.dataPercorrida = Math.round(

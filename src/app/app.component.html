@@ -5,14 +5,20 @@
   <div class="bg-gray-700 text-white self-center">
     <div class="max-w-7/10 mb-4 flex p-5 justify-between w-full">
       <div class="flex gap-3">
-        <img
-          class="font-bold self-center cursor-pointer"
-          width="100"
-          height="auto"
-          src="./assets/brasao.png"
-          alt=""
+        <button
+          type="button"
+          class="self-center cursor-pointer"
+          aria-label="Ir para a página inicial"
           (click)="enviaInicio()"
-        />
+        >
+          <img
+            class="font-bold"
+            width="100"
+            height="auto"
+            src="./assets/brasao.png"
+            alt="Brasão da Polícia Judiciária Civil de Mato Grosso"
+          />
+        </button>
         <span class="text-xl w-60 self-center">
           Polícia Judiciária Civil Estado de Mato Grosso
         </span>
