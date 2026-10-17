@@ -1,4 +1,9 @@
-import { Component, OnDestroy, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import { DesaparecidosFacade } from '../../desaparecidos.facade';
 import { Subject, takeUntil } from 'rxjs';
 import { IPessoas } from '../../models/pessoas.model';
@@ -13,6 +18,7 @@ import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-deta
   imports: [CommonModule, MatCardModule, MatButtonModule, MatDialogModule],
   standalone: true,
   templateUrl: './desaparecidos-detalhe.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './desaparecidos-detalhe.component.scss',
 })
 export class DesaparecidosDetalheComponent implements OnDestroy {

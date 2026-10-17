@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -47,6 +47,7 @@ export interface ImagemSelecionada {
   ],
   standalone: true,
   templateUrl: './desaparecidos-detalhe-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './desaparecidos-detalhe-dialog.component.scss',
 })
 export class DesaparecidosDetalheDialogComponent {

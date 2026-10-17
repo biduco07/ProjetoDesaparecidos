@@ -29,7 +29,7 @@ _Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 
 ## Stack
 
-- [Angular 19](https://angular.dev/) (standalone components, novo control flow `@if`/`@for`, SSR)
+- [Angular 22](https://angular.dev/) (standalone components, `inject()`, control flow `@if`/`@for`, SSR)
 - [Angular Material](https://material.angular.io/)
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [RxJS](https://rxjs.dev/)
@@ -77,7 +77,7 @@ src/
 
 Pré-requisitos: **Node.js 22 (LTS)** e npm.
 
-> **Atenção à versão do Node:** o Angular 19 suporta Node 18, 20 e 22, mas **não o Node 24**. A versão do projeto está fixada no [`.nvmrc`](.nvmrc) e no campo `engines` do `package.json` (o npm avisa com `EBADENGINE` se a versão for outra). Com nvm/fnm, rode `nvm use` (ou `fnm use`) na raiz do projeto. A CI e o Docker usam a mesma versão.
+> **Atenção à versão do Node:** o Angular 22 exige Node **22.22.3 ou mais novo** na linha 22 (também aceita 24.15+ e 26+). A versão do projeto está fixada no [`.nvmrc`](.nvmrc) e no campo `engines` do `package.json` (o npm avisa com `EBADENGINE` se a versão for outra). Com nvm/fnm, rode `nvm use` (ou `fnm use`) na raiz do projeto. A CI e o Docker usam a mesma versão.
 
 ```sh
 git clone https://github.com/biduco07/ProjetoDesaparecidos.git

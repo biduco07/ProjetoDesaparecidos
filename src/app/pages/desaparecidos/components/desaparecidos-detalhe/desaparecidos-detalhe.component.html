@@ -19,7 +19,7 @@
   <div>
     <img
       [src]="pessoa?.urlFoto || './assets/semfoto.jpg'"
-      [alt]="'Imagem do indivíduo: ' + pessoa?.nome"
+      [alt]="'Imagem do indivíduo: ' + $safeNavigationMigration(pessoa?.nome)"
       height="128"
       class="w-full h-120 object-cover p-2 max-w-lg"
     />
@@ -35,7 +35,7 @@
     @if(pessoa?.ultimaOcorrencia?.dataLocalizacao){
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Data Localizado:</span>
-      {{ pessoa?.ultimaOcorrencia?.dataLocalizacao | date : "dd/MM/yyyy " }}
+      {{ $safeNavigationMigration(pessoa?.ultimaOcorrencia?.dataLocalizacao) | date : "dd/MM/yyyy " }}
     </div>
 
     <div class="flex flex-row">
@@ -47,7 +47,7 @@
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Data:</span>
       {{
-        pessoa?.ultimaOcorrencia?.dtDesaparecimento
+        $safeNavigationMigration(pessoa?.ultimaOcorrencia?.dtDesaparecimento)
           | date : "dd/MM/yyyy HH:mm:ss"
       }}
     </div>
