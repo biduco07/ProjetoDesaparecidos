@@ -10,13 +10,19 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 
 ## Capturas de tela
 
-<!--
-  Espaço reservado para prints/GIF da aplicação. Exemplo:
-  ![Listagem com filtros](screenshots/listagem.png)
-  ![Detalhe de uma pessoa](screenshots/detalhe.png)
--->
+| Listagem com totalizadores | Filtros aplicados |
+| --- | --- |
+| [![Listagem com os totalizadores, o painel de consulta e os cards paginados](screenshots/listagem.png)](screenshots/listagem.png) | [![Consulta filtrada por nome, faixa etária de 15 a 40 anos, sexo feminino e status desaparecido](screenshots/filtros.png)](screenshots/filtros.png) |
 
-_Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
+| Tela de detalhe | Envio de informações |
+| --- | --- |
+| [![Detalhe de uma pessoa desaparecida, com dados do desaparecimento e contagem de dias](screenshots/detalhe.png)](screenshots/detalhe.png) | [![Diálogo com o campo de informação, a data com máscara e a pré-visualização de uma imagem](screenshots/dialogo-informacoes.png)](screenshots/dialogo-informacoes.png) |
+
+| Erro com "Tentar de novo" | Mobile (listagem e detalhe) |
+| --- | --- |
+| [![Mensagem de erro no lugar da lista, com o botão Tentar de novo](screenshots/erro.png)](screenshots/erro.png) | [![Listagem no celular](screenshots/mobile-listagem.png)](screenshots/mobile-listagem.png) [![Detalhe no celular](screenshots/mobile-detalhe.png)](screenshots/mobile-detalhe.png) |
+
+> As capturas usam **dados fictícios**: o script [`scripts/capturas-de-tela.mjs`](scripts/capturas-de-tela.mjs) roda o app de verdade no Chromium (Playwright) e simula as respostas da API Abitus, para não expor dados de pessoas reais e não enviar nada à polícia. Veja [Como gerar as capturas](#como-gerar-as-capturas-de-tela).
 
 ## Funcionalidades
 
@@ -27,6 +33,23 @@ _Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 - Se a API falhar, a lista e a tela de detalhe mostram uma mensagem amigável com o botão "Tentar de novo".
 - Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens.
 - Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
+
+## Requisitos do teste e onde estão atendidos
+
+| Requisito                                         | Como foi atendido                                                                                                                                  |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Consumir a API pública Abitus                      | `DesaparecidosService` (`/v1/pessoas/aberto/filtro`, `/v1/pessoas/{id}`, `/v1/pessoas/aberto/estatistico` e `POST /v1/ocorrencias/informacoes-desaparecido`) |
+| Listagem em cards com foto e dados da pessoa       | Cards do Angular Material com foto (ou imagem padrão), nome, idade, sexo, data e local do desaparecimento                                          |
+| Paginação                                         | `mat-paginator` com 12 registros por página, paginação feita pela própria API                                                                      |
+| Busca e filtros                                   | Nome, faixa etária, sexo e status; "Limpar" volta à consulta inicial                                                                              |
+| Detalhe com destaque da situação                   | Faixa e borda vermelhas (desaparecido) ou verdes (localizado), dados da ocorrência e dias desde o desaparecimento                                  |
+| Envio de informações sobre a pessoa                | Diálogo com informação, data com máscara (`ngx-mask`) e várias imagens com pré-visualização, enviado como `multipart/form-data`                    |
+| Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
+| Layout responsivo                                 | Tailwind: filtros acima da lista e 2 colunas de cards no celular; filtros na lateral e 3 colunas no desktop                                        |
+| Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; alerta (snackbar) no envio de informações                                            |
+| Testes unitários                                  | 50 testes em 7 arquivos (Vitest), rodando na CI a cada push e PR                                                                                   |
+| Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
+| README com instruções                             | Este arquivo: [como rodar](#como-rodar), [como testar](#como-testar) e [decisões técnicas](#decisões-técnicas)                                     |
 
 ## Stack
 
@@ -55,6 +78,16 @@ Componente  ──comandos──▶  Facade  ──HTTP──▶  DesaparecidosS
 
 Isso mantém os componentes simples, concentra regras de negócio em um único ponto e facilita testar cada camada isoladamente.
 
+## Decisões técnicas
+
+- **Facade + State com RxJS em vez de NgRx/NGXS:** a feature tem um único fluxo (lista, filtros, detalhe). `BehaviorSubject`s numa classe de state dão a mesma separação sem o custo de actions/reducers.
+- **Standalone components, `inject()` e signals com `OnPush`:** os componentes convertem os observables da facade em signals (`toSignal`) e usam detecção de mudanças `OnPush`, o que evita verificações desnecessárias.
+- **SSR com pré-renderização, mas sem dados da API no servidor:** o HTML das rotas é gerado no build (primeira pintura rápida e boa para SEO), mas a facade só chama a API no navegador. Assim a lista nunca fica congelada no HTML do build.
+- **Filtros opcionais fora da query string quando vazios:** `sexo` e `status` só são enviados quando escolhidos, para não mandar `undefined`/`null` como texto para a API.
+- **Erro com nova tentativa no lugar da tela:** se a lista ou o detalhe falham, a área de conteúdo mostra a mensagem e o botão "Tentar de novo", que repete a mesma consulta (mesma página e filtros).
+- **Vitest + jsdom em vez de Karma:** os testes rodam sem abrir navegador, mais rápido na máquina e na CI, com o builder oficial `@angular/build:unit-test`.
+- **Demo estática no GitHub Pages:** a configuração `pages` gera só os arquivos do navegador em `docs/`, sem precisar de servidor Node.
+
 ## Estrutura de pastas
 
 ```
@@ -72,6 +105,9 @@ src/
       paginacao/                # modelos de paginação
   assets/
   environments/                 # configuração por ambiente (URL da API)
+scripts/                        # script que gera as capturas de tela
+screenshots/                    # capturas usadas neste README
+docs/                           # build da demo publicada no GitHub Pages
 ```
 
 ## Como rodar
@@ -87,18 +123,62 @@ npm ci
 npm start
 ```
 
-A aplicação fica disponível em `http://localhost:4200/`.
+A aplicação fica disponível em `http://localhost:4200/`. Ela chama a API Abitus direto do navegador (`src/environments/`), então precisa de acesso à internet.
+
+### Com SSR (build de produção)
+
+```sh
+npm run build
+npm run serve:ssr:ProjetoDesaparecidos
+```
+
+O servidor Express do Angular SSR sobe em `http://localhost:4000/` (porta configurável com `PORT`).
 
 ### Scripts
 
-| Comando               | Descrição                                           |
-| --------------------- | --------------------------------------------------- |
-| `npm start`           | Servidor de desenvolvimento                         |
-| `npm test`            | Testes unitários (Vitest) em modo watch             |
-| `npm run test:ci`     | Testes uma única vez (jsdom, sem abrir navegador)   |
-| `npm run lint`        | ESLint com as regras do angular-eslint              |
-| `npm run build`       | Build de produção em `dist/projeto-desaparecidos`   |
-| `npm run build:pages` | Build de produção da demo em `docs/` (GitHub Pages) |
+| Comando                                  | Descrição                                           |
+| ---------------------------------------- | --------------------------------------------------- |
+| `npm start`                              | Servidor de desenvolvimento                         |
+| `npm test`                               | Testes unitários (Vitest) em modo watch             |
+| `npm run test:ci`                        | Testes uma única vez (jsdom, sem abrir navegador)   |
+| `npm run lint`                           | ESLint com as regras do angular-eslint              |
+| `npm run build`                          | Build de produção em `dist/projeto-desaparecidos`   |
+| `npm run serve:ssr:ProjetoDesaparecidos` | Serve o build de produção com SSR                   |
+| `npm run build:pages`                    | Build de produção da demo em `docs/` (GitHub Pages) |
+
+## Como testar
+
+### Verificações automáticas
+
+```sh
+npm run lint      # ESLint (angular-eslint)
+npm run test:ci   # 50 testes unitários com Vitest + jsdom
+npm run build     # build de produção com SSR e pré-renderização
+```
+
+São os mesmos passos da CI. O build avisa que o bundle inicial (~590 kB) passa do orçamento de aviso de 500 kB do `angular.json`; não é erro (o limite de erro é 1 MB).
+
+### Roteiro manual
+
+1. Abra a [demo](https://biduco07.github.io/ProjetoDesaparecidos/) ou rode `npm start`.
+2. Confira os totalizadores no topo e navegue entre as páginas da lista.
+3. Filtre por nome, faixa etária, sexo e status e clique em **Consultar**; **Limpar** volta à lista completa.
+4. Clique num card para abrir o detalhe (faixa vermelha para desaparecido, verde para localizado).
+5. Numa pessoa desaparecida, clique em **Encontrou Essa Pessoa?** para abrir o formulário. Atenção: **Enviar** manda a informação de verdade para a API da Polícia Civil; para testar sem enviar, use **Fechar**.
+6. Para ver o estado de erro, bloqueie a API no DevTools (aba Network, *Block request domain* `abitus-api.geia.vip`) e recarregue: aparece a mensagem com **Tentar de novo**.
+7. Para o layout mobile, use o modo de dispositivo do DevTools (ex.: 390 × 844).
+
+### Como gerar as capturas de tela
+
+As imagens de [`screenshots/`](screenshots) são geradas pelo [`scripts/capturas-de-tela.mjs`](scripts/capturas-de-tela.mjs), que abre o app no Chromium com o Playwright e simula a API Abitus com dados fictícios (nada é enviado à API real). O Playwright não é dependência do projeto; instale-o só para isso:
+
+```sh
+npm i --no-save playwright && npx playwright install chromium
+npm start   # em outro terminal
+node scripts/capturas-de-tela.mjs http://localhost:4200/ screenshots
+```
+
+Os PNGs versionados foram reduzidos para paleta de 256 cores (cerca de metade do tamanho) depois de gerados.
 
 ### Qualidade e CI
 
@@ -106,7 +186,7 @@ O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo p
 
 Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações) e os componentes principais.
 
-### Docker
+## Docker
 
 O `Dockerfile` é multi-stage: a primeira etapa (Node) instala as dependências com `npm ci` e gera o build; a segunda (`nginx:alpine`) serve apenas os arquivos estáticos com o `nginx.conf` do projeto. Não é preciso ter Node instalado na máquina.
 
@@ -117,7 +197,7 @@ docker run -d -p 8080:80 --name projeto-desaparecidos projeto-desaparecidos
 
 A aplicação fica disponível em `http://localhost:8080/`.
 
-### Publicação da demo (GitHub Pages)
+## Publicação da demo (GitHub Pages)
 
 A demo em https://biduco07.github.io/ProjetoDesaparecidos/ é servida pelo GitHub Pages a partir da pasta [`docs/`](docs) do branch `main`. Para atualizá-la:
 
