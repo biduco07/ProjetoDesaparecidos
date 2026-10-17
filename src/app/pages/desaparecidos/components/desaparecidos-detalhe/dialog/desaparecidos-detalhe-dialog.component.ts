@@ -22,6 +22,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { NgxMaskDirective } from 'ngx-mask';
 import { AlertService } from '../../../../../core/alert.service';
 
+/** Arquivo escolhido pelo usuário e a pré-visualização exibida no diálogo. */
+export interface ImagemSelecionada {
+  arquivo: File;
+  /** Data URL gerada pelo FileReader; fica vazia até a leitura terminar. */
+  preview: string;
+}
+
 @Component({
   selector: 'app-desaparecidos-detalhe-dialog',
   imports: [
@@ -45,8 +52,11 @@ import { AlertService } from '../../../../../core/alert.service';
 export class DesaparecidosDetalheDialogComponent {
   form!: FormGroup;
 
-  savedImages: string[] = []; // Array para armazenar imagens localmente
-  selectedFiles: File[] = []; // Array para armazenar os arquivos selecionados
+  /**
+   * Arquivo e pré-visualização ficam no mesmo item para que remover uma
+   * imagem também remova o arquivo que seria enviado.
+   */
+  imagens: ImagemSelecionada[] = [];
 
   constructor(
     private _fb: FormBuilder,
@@ -71,24 +81,23 @@ export class DesaparecidosDetalheDialogComponent {
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input?.files?.length) {
-      // Iterar sobre os arquivos selecionados
       Array.from(input.files).forEach((file) => {
-        // Gerar uma pré-visualização da imagem
+        // O item entra na lista na ordem da seleção; a pré-visualização é
+        // preenchida quando a leitura (assíncrona) do arquivo terminar.
+        const imagem: ImagemSelecionada = { arquivo: file, preview: '' };
+        this.imagens.push(imagem);
+
         const reader = new FileReader();
         reader.onload = () => {
-          // Armazenar a imagem na variável local
-          this.savedImages.push(reader.result as string);
+          imagem.preview = reader.result as string;
         };
         reader.readAsDataURL(file);
-
-        // Salvar o arquivo na lista de arquivos selecionados
-        this.selectedFiles.push(file);
       });
     }
   }
 
-  removeImage(index: number) {
-    this.savedImages.splice(index, 1); // Remove a imagem do array pelo índice
+  removeImage(index: number): void {
+    this.imagens.splice(index, 1);
   }
 
   onSend(): void {
@@ -101,8 +110,8 @@ export class DesaparecidosDetalheDialogComponent {
       formData.append('descricao', this.form.value.descricao);
       formData.append('informacao', this.form.value.informacao);
       formData.append('data', dataConvertida);
-      for (const file of this.selectedFiles) {
-        formData.append('files', file);
+      for (const { arquivo } of this.imagens) {
+        formData.append('files', arquivo);
       }
       this.dialogRef.close();
       this.form.reset();
