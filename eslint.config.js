@@ -30,10 +30,6 @@ module.exports = tseslint.config(
           style: "kebab-case",
         },
       ],
-      // A migração do Angular 22 marcou os componentes com
-      // ChangeDetectionStrategy.Eager para manter o comportamento anterior.
-      // Desligado até os componentes serem convertidos para OnPush.
-      "@angular-eslint/prefer-on-push-component-change-detection": "off",
     },
   },
   {

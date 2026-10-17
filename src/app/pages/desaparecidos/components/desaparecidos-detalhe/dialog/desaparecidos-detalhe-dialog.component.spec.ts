@@ -94,7 +94,18 @@ describe('DesaparecidosDetalheDialogComponent', () => {
 
     component.removeImage(0);
 
-    expect(component.imagens.length).toBe(1);
-    expect(component.imagens[0].arquivo).toBe(foto2);
+    expect(component.imagens().length).toBe(1);
+    expect(component.imagens()[0].arquivo).toBe(foto2);
+  });
+
+  it('mostra a pré-visualização quando a leitura do arquivo termina', async () => {
+    component.onFilesSelected(eventoDeSelecao([criarArquivo('foto1.png')]));
+
+    // O FileReader é assíncrono; o signal atualiza a view (OnPush) no fim.
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      const img = (fixture.nativeElement as HTMLElement).querySelector('img');
+      expect(img?.getAttribute('src')).toMatch(/^data:image\/png;base64,/);
+    });
   });
 });

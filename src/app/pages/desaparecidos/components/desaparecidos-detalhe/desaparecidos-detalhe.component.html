@@ -1,4 +1,5 @@
-@if (pessoa?.ultimaOcorrencia?.dataLocalizacao) {
+@if (pessoa(); as pessoa) {
+@if (pessoa.ultimaOcorrencia?.dataLocalizacao) {
 <span class="bg-green-600 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
   >Localizado</span
 >
@@ -10,7 +11,7 @@
 
 <div
   [ngClass]="
-    pessoa?.ultimaOcorrencia?.dataLocalizacao
+    pessoa.ultimaOcorrencia?.dataLocalizacao
       ? 'border-green-600'
       : 'border-red-600'
   "
@@ -18,62 +19,62 @@
 >
   <div>
     <img
-      [src]="pessoa?.urlFoto || './assets/semfoto.jpg'"
-      [alt]="'Imagem do indivíduo: ' + $safeNavigationMigration(pessoa?.nome)"
+      [src]="pessoa.urlFoto || './assets/semfoto.jpg'"
+      [alt]="'Imagem do indivíduo: ' + pessoa.nome"
       height="128"
       class="w-full h-120 object-cover p-2 max-w-lg"
     />
   </div>
   <div class="flex flex-col text-left mt-1">
-    <div class="font-semibold text-2xl">{{ pessoa?.nome }}</div>
+    <div class="font-semibold text-2xl">{{ pessoa.nome }}</div>
     <div class="font-semibold text-xl">
-      {{ pessoa?.idade }} Anos - {{ pessoa?.sexo }}
+      {{ pessoa.idade }} Anos - {{ pessoa.sexo }}
     </div>
     <hr class="my-2" />
 
     <div class="font-semibold text-xl my-2">Dados sobre o Desaparecimento</div>
-    @if(pessoa?.ultimaOcorrencia?.dataLocalizacao){
+    @if(pessoa.ultimaOcorrencia?.dataLocalizacao){
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Data Localizado:</span>
-      {{ $safeNavigationMigration(pessoa?.ultimaOcorrencia?.dataLocalizacao) | date : "dd/MM/yyyy " }}
+      {{ pessoa.ultimaOcorrencia?.dataLocalizacao | date : "dd/MM/yyyy " }}
     </div>
 
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Encontrado Vivo?</span>
-      {{ pessoa?.ultimaOcorrencia?.encontradoVivo ? "Sim" : "Não" }}
+      {{ pessoa.ultimaOcorrencia?.encontradoVivo ? "Sim" : "Não" }}
     </div>
     } @else {
 
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Data:</span>
       {{
-        $safeNavigationMigration(pessoa?.ultimaOcorrencia?.dtDesaparecimento)
+        pessoa.ultimaOcorrencia?.dtDesaparecimento
           | date : "dd/MM/yyyy HH:mm:ss"
       }}
     </div>
 
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Local:</span>
-      {{ pessoa?.ultimaOcorrencia?.localDesaparecimentoConcat }}
+      {{ pessoa.ultimaOcorrencia?.localDesaparecimentoConcat }}
     </div>
-    @if(pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
+    @if(pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
     ?.vestimentasDesaparecido){
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Vestimenta:</span>
       {{
-        pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
+        pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
           ?.vestimentasDesaparecido
       }}
     </div>
-    } @if(pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao){
+    } @if(pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao){
 
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Informações:</span>
-      {{ pessoa?.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao }}
+      {{ pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao }}
     </div>
     }
     <div class="py-2 font-bold text-xl text-red-500">
-      Desaparecido Há {{ dataPercorrida }} Dias.
+      Desaparecido Há {{ dataPercorrida() }} Dias.
     </div>
     <button
       class="!bg-red-600 w-60 py-3"
@@ -86,3 +87,4 @@
     }
   </div>
 </div>
+}

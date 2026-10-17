@@ -1,39 +1,57 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  computed,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DesaparecidosFacade } from '../../desaparecidos.facade';
-import { Subject, takeUntil } from 'rxjs';
+import { map } from 'rxjs';
 import { IPessoas } from '../../models/pessoas.model';
-import { CommonModule } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-detalhe-dialog.component';
+
+const UM_DIA_EM_MS = 1000 * 60 * 60 * 24;
+
 @Component({
   selector: 'app-desaparecidos-detalhe',
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatDialogModule],
+  imports: [DatePipe, NgClass, MatCardModule, MatButtonModule, MatDialogModule],
   standalone: true,
   templateUrl: './desaparecidos-detalhe.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './desaparecidos-detalhe.component.scss',
 })
-export class DesaparecidosDetalheComponent implements OnDestroy {
+export class DesaparecidosDetalheComponent {
   private dialog = inject(MatDialog);
   private _facade = inject(DesaparecidosFacade);
   private router = inject(Router);
 
   id!: number;
-  pessoa!: IPessoas;
-  dataPercorrida!: number;
-  private _unsubscribeFlag$ = new Subject<void>();
+
+  /** Pessoa carregada no state, ou null enquanto ainda não há dados. */
+  readonly pessoa = toSignal(
+    this._facade.detalhePessoa$.pipe(
+      map((value: IPessoas) => (Object.keys(value).length > 0 ? value : null))
+    ),
+    { initialValue: null }
+  );
+
+  /** Dias (arredondados) desde a data do desaparecimento. */
+  readonly dataPercorrida = computed(() => {
+    const data = this.pessoa()?.ultimaOcorrencia?.dtDesaparecimento;
+    if (!data) {
+      return null;
+    }
+    return Math.round((Date.now() - new Date(data).getTime()) / UM_DIA_EM_MS);
+  });
 
   constructor() {
     this._facade.idDetalhe$
-      .pipe(takeUntil(this._unsubscribeFlag$))
+      .pipe(takeUntilDestroyed())
       .subscribe((value: number) => {
         if (!isNaN(Number(value))) {
           this.id = value;
@@ -41,35 +59,14 @@ export class DesaparecidosDetalheComponent implements OnDestroy {
           this.router.navigate(['/']);
         }
       });
-
-    this._facade.detalhePessoa$
-      .pipe(takeUntil(this._unsubscribeFlag$))
-      .subscribe((value: IPessoas) => {
-        if (Object.keys(value).length > 0) {
-          this.pessoa = value;
-          this.convertToToday(this.pessoa?.ultimaOcorrencia?.dtDesaparecimento);
-        }
-      });
-  }
-  ngOnDestroy(): void {
-    this._unsubscribeFlag$.next();
-    this._unsubscribeFlag$.complete();
-  }
-
-  convertToToday(date: Date | string): void {
-    const parseDataLong = new Date(date).getTime();
-    const dateNow = Date.now();
-    this.dataPercorrida = dateNow - parseDataLong;
-    this.dataPercorrida = Math.round(
-      this.dataPercorrida / (1000 * 60 * 60 * 24)
-    );
   }
 
   openDialog(): void {
+    const pessoa = this.pessoa();
     this.dialog.open(DesaparecidosDetalheDialogComponent, {
       data: {
-        id: this.pessoa?.ultimaOcorrencia?.ocoId,
-        descricao: this.pessoa?.nome,
+        id: pessoa?.ultimaOcorrencia?.ocoId,
+        descricao: pessoa?.nome,
       },
       width: '600px', // Tamanho do diálogo
     });

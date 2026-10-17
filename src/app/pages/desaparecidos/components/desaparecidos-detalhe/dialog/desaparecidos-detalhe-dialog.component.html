@@ -45,11 +45,11 @@
     </div>
 
     <div class="pt-2 px-4">
-      @if (imagens.length) {
+      @if (imagens().length) {
       <div>
         <h3>Imagens Salvas:</h3>
         <div class="flex flex-wrap gap-2">
-          @for (imagem of imagens; track imagem; let i = $index) {
+          @for (imagem of imagens(); track imagem.arquivo; let i = $index) {
           <div class="relative">
             @if (imagem.preview) {
             <img [src]="imagem.preview" alt="Imagem {{ i + 1 }}" width="200" />
