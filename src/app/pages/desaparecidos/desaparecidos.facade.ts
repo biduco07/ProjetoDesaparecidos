@@ -11,6 +11,10 @@ import { AlertService } from '../../core/alert.service';
 import { IConsulta } from './models/consulta.model';
 import { Router } from '@angular/router';
 
+/** Mensagem exibida no lugar da lista quando a API não responde. */
+export const MENSAGEM_ERRO_CONSULTA =
+  'Não foi possível carregar a lista de pessoas. Verifique sua conexão e tente de novo.';
+
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
   localizadosDesaparecidos$!: Observable<IEstatisticas>;
@@ -19,6 +23,7 @@ export class DesaparecidosFacade {
   controlePaginacao$!: Observable<Paginacao>;
   formularioConsulta$!: Observable<IConsulta>;
   idDetalhe$!: Observable<number>;
+  erroConsulta$!: Observable<string | null>;
 
   constructor(
     private _api: DesaparecidosService,
@@ -33,6 +38,7 @@ export class DesaparecidosFacade {
     this.controlePaginacao$ = this._state.controlePaginacao$;
     this.formularioConsulta$ = this._state.formularioConsulta$;
     this.idDetalhe$ = this._state.idDetalhe$;
+    this.erroConsulta$ = this._state.erroConsulta$;
   }
 
   loadInitialData(): void {
@@ -55,6 +61,7 @@ export class DesaparecidosFacade {
   }
 
   consultarDesaparecidos(): void {
+    this._state.erroConsulta = null;
     this._api
       .getArquivos(
         this._state.controlePaginacao,
@@ -66,8 +73,20 @@ export class DesaparecidosFacade {
         },
         error: (error) => {
           console.error('Erro ao consultar desaparecidos', error);
+          this._state.erroConsulta = MENSAGEM_ERRO_CONSULTA;
         },
       });
+  }
+
+  /**
+   * Repete a consulta que falhou (mesma página e filtros) e, se os
+   * totalizadores também não tinham carregado, busca-os de novo.
+   */
+  tentarNovamente(): void {
+    this.consultarDesaparecidos();
+    if (this._state.localizadosDesaparecidos?.quantPessoasDesaparecidas == null) {
+      this.consultarEstatisticas();
+    }
   }
   abrirDetalhes(id: number): void {
     this._api.getArquivosDetalhe(id).subscribe({

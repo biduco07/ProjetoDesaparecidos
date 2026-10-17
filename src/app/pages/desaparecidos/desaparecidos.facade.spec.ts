@@ -79,15 +79,69 @@ describe('DesaparecidosFacade', () => {
       expect(estatisticasEmitidas).toEqual(estatisticas);
     });
 
-    it('mantém o state quando a consulta falha', () => {
+    it('mantém a lista e publica uma mensagem amigável quando a consulta falha', () => {
       const erro = spyOn(console, 'error');
       api.getArquivos.and.returnValue(throwError(() => new Error('offline')));
       const listaAntes = state.listaPessoas;
+      let erroEmitido: string | null | undefined;
+      facade.erroConsulta$.subscribe((v) => (erroEmitido = v));
 
       facade.consultarDesaparecidos();
 
       expect(state.listaPessoas).toBe(listaAntes);
+      expect(erroEmitido).toContain('Não foi possível carregar');
       expect(erro).toHaveBeenCalled();
+    });
+
+    it('limpa o erro quando uma nova consulta dá certo', () => {
+      state.erroConsulta = 'Falhou antes';
+
+      facade.consultarDesaparecidos();
+
+      expect(state.erroConsulta).toBeNull();
+      expect(state.listaPessoas).toEqual(pagina);
+    });
+  });
+
+  describe('tentar de novo', () => {
+    beforeEach(() => spyOn(console, 'error'));
+
+    it('refaz a consulta com a página e os filtros atuais', () => {
+      const filtros = { nome: 'ANA' } as IConsulta;
+      state.formularioConsulta = filtros;
+      state.controlePaginacao = { page: 3, size: 12 };
+      state.erroConsulta = 'Falhou';
+      state.localizadosDesaparecidos = estatisticas;
+
+      facade.tentarNovamente();
+
+      expect(api.getArquivos).toHaveBeenCalledOnceWith(
+        { page: 3, size: 12 },
+        filtros
+      );
+      expect(state.erroConsulta).toBeNull();
+      expect(state.listaPessoas).toEqual(pagina);
+    });
+
+    it('recarrega as estatísticas quando elas também não carregaram', () => {
+      api.getEstatisticas.and.returnValue(
+        throwError(() => new Error('offline'))
+      );
+      facade.consultarEstatisticas();
+      api.getEstatisticas.and.returnValue(of(estatisticas));
+
+      facade.tentarNovamente();
+
+      expect(api.getEstatisticas).toHaveBeenCalledTimes(2);
+      expect(state.localizadosDesaparecidos).toEqual(estatisticas);
+    });
+
+    it('não busca de novo as estatísticas que já foram carregadas', () => {
+      state.localizadosDesaparecidos = estatisticas;
+
+      facade.tentarNovamente();
+
+      expect(api.getEstatisticas).not.toHaveBeenCalled();
     });
   });
 

@@ -92,7 +92,19 @@
   </div>
 
   <div class="w-full md:w-9/12 px-2">
-    @if(listaPessoas){
+    @if (erroConsulta) {
+    <div
+      role="alert"
+      class="flex flex-col items-center gap-3 rounded-lg border border-red-300 bg-red-50 p-6 text-red-800"
+    >
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <p>{{ erroConsulta }}</p>
+      <button mat-raised-button type="button" (click)="tentarNovamente()">
+        <mat-icon>refresh</mat-icon>
+        Tentar de novo
+      </button>
+    </div>
+    } @else if(listaPessoas){
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
       @for(lista of listaPessoas.content; track $index){
       <mat-card

@@ -47,6 +47,7 @@ export class DesaparecidosComponent {
   listaPessoas!: ResultadoPaginado<IPessoas>;
   paginacao!: Paginacao;
   formularioConsulta!: IConsulta;
+  erroConsulta: string | null = null;
 
   constructor(private _facade: DesaparecidosFacade, private _fb: FormBuilder) {
     this.criarForm();
@@ -82,6 +83,12 @@ export class DesaparecidosComponent {
           this.criarForm();
         }
       });
+
+    this._facade.erroConsulta$
+      .pipe(takeUntilDestroyed())
+      .subscribe((value: string | null) => {
+        this.erroConsulta = value;
+      });
   }
 
   criarForm(): void {
@@ -106,6 +113,10 @@ export class DesaparecidosComponent {
 
   handlePagination(event: PageEvent): void {
     this._facade.handlePagination(event);
+  }
+
+  tentarNovamente(): void {
+    this._facade.tentarNovamente();
   }
   resetForm() {
     this.form.reset();

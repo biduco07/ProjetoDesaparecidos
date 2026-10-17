@@ -14,6 +14,7 @@ export class DesaparecidosState {
   private _detalhePessoa$!: BehaviorSubject<IPessoas>;
   private _formularioConsulta$!: BehaviorSubject<IConsulta>;
   private _idDetalhe$!: BehaviorSubject<number>;
+  private _erroConsulta$!: BehaviorSubject<string | null>;
 
   constructor() {
     this._localizadosDesaparecidos$ = new BehaviorSubject<IEstatisticas>(
@@ -30,6 +31,7 @@ export class DesaparecidosState {
     this._detalhePessoa$ = new BehaviorSubject<IPessoas>({} as IPessoas);
     this._formularioConsulta$ = new BehaviorSubject<IConsulta>({} as IConsulta);
     this._idDetalhe$ = new BehaviorSubject<number>({} as number);
+    this._erroConsulta$ = new BehaviorSubject<string | null>(null);
   }
   // Visualizar localizadosDesaparecidos
   get localizadosDesaparecidos$(): Observable<IEstatisticas> {
@@ -95,5 +97,16 @@ export class DesaparecidosState {
   }
   set idDetalhe(value: number) {
     this._idDetalhe$.next(value);
+  }
+
+  // Mensagem exibida quando a consulta da lista falha (null = sem erro)
+  get erroConsulta$(): Observable<string | null> {
+    return this._erroConsulta$.asObservable();
+  }
+  get erroConsulta(): string | null {
+    return this._erroConsulta$.value;
+  }
+  set erroConsulta(value: string | null) {
+    this._erroConsulta$.next(value);
   }
 }
