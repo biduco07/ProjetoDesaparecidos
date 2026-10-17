@@ -47,7 +47,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
 | Layout responsivo                                 | Tailwind: filtros acima da lista e 2 colunas de cards no celular; filtros na lateral e 3 colunas no desktop                                        |
 | Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; alerta (snackbar) no envio de informações                                            |
-| Testes unitários                                  | 50 testes em 7 arquivos (Vitest), rodando na CI a cada push e PR                                                                                   |
+| Testes unitários                                  | 90 testes em 9 arquivos (Vitest), cobertura de linhas de ~99%, rodando na CI a cada push e PR                                                                                   |
 | Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
 | README com instruções                             | Este arquivo: [como rodar](#como-rodar), [como testar](#como-testar) e [decisões técnicas](#decisões-técnicas)                                     |
 
@@ -141,6 +141,7 @@ O servidor Express do Angular SSR sobe em `http://localhost:4000/` (porta config
 | `npm start`                              | Servidor de desenvolvimento                         |
 | `npm test`                               | Testes unitários (Vitest) em modo watch             |
 | `npm run test:ci`                        | Testes uma única vez (jsdom, sem abrir navegador)   |
+| `npm run test:coverage`                  | Testes com relatório de cobertura em `coverage/`    |
 | `npm run lint`                           | ESLint com as regras do angular-eslint              |
 | `npm run build`                          | Build de produção em `dist/projeto-desaparecidos`   |
 | `npm run serve:ssr:ProjetoDesaparecidos` | Serve o build de produção com SSR                   |
@@ -152,7 +153,7 @@ O servidor Express do Angular SSR sobe em `http://localhost:4000/` (porta config
 
 ```sh
 npm run lint      # ESLint (angular-eslint)
-npm run test:ci   # 50 testes unitários com Vitest + jsdom
+npm run test:ci   # 90 testes unitários com Vitest + jsdom
 npm run build     # build de produção com SSR e pré-renderização
 ```
 
@@ -184,11 +185,11 @@ Os PNGs versionados foram reduzidos para paleta de 256 cores (cerca de metade do
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo push para `main`/`dev` e em pull requests: `npm ci`, lint, testes (Vitest) e build de produção.
 
-Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações) e os componentes principais.
+Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações), os componentes principais (incluindo validação do formulário, teclado e atributos de acessibilidade) e o paginador em português.
 
 ## Docker
 
-O `Dockerfile` é multi-stage: a primeira etapa (Node) instala as dependências com `npm ci` e gera o build; a segunda (`nginx:alpine`) serve apenas os arquivos estáticos com o `nginx.conf` do projeto. Não é preciso ter Node instalado na máquina.
+O `Dockerfile` é multi-stage: a primeira etapa (Node) instala as dependências com `npm ci` e gera o build; a segunda (`nginx:stable-alpine`) serve apenas os arquivos estáticos com a configuração da pasta [`nginx/`](nginx): cabeçalhos de segurança (CSP, `X-Frame-Options`, `nosniff` etc.), cache longo para JS/CSS com hash e `no-cache` para o HTML, e fallback da SPA para o `index.csr.html`. Não é preciso ter Node instalado na máquina.
 
 ```sh
 docker build -t projeto-desaparecidos .

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -16,7 +21,12 @@ import { DesaparecidosFacade } from '../desaparecidos.facade';
 import { DatePipe } from '@angular/common';
 import { filter } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import {
+  MatPaginatorIntl,
+  MatPaginatorModule,
+  PageEvent,
+} from '@angular/material/paginator';
+import { PaginadorIntl } from '../../../shared/paginacao/paginador-intl';
 import { IConsulta } from '../models/consulta.model';
 @Component({
   selector: 'app-desaparecidos',
@@ -37,6 +47,9 @@ import { IConsulta } from '../models/consulta.model';
     MatProgressSpinnerModule,
     MatPaginatorModule,
   ],
+  // Fica no componente (e não no app.config) para o paginador continuar
+  // fora do bundle inicial.
+  providers: [{ provide: MatPaginatorIntl, useClass: PaginadorIntl }],
 })
 export class DesaparecidosComponent {
   private _facade = inject(DesaparecidosFacade);
@@ -59,6 +72,20 @@ export class DesaparecidosComponent {
   });
   readonly erroConsulta = toSignal(this._facade.erroConsulta$, {
     initialValue: null,
+  });
+
+  /** Texto anunciado pela região aria-live quando uma consulta termina. */
+  readonly resumoResultados = computed(() => {
+    const total = this.listaPessoas()?.totalElements;
+    if (total == null) {
+      return '';
+    }
+    if (total === 0) {
+      return 'Nenhuma pessoa encontrada.';
+    }
+    return total === 1
+      ? '1 pessoa encontrada.'
+      : `${total} pessoas encontradas.`;
   });
 
   constructor() {

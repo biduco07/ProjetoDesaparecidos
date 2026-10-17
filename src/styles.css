@@ -11,3 +11,32 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+/*
+ * Ajustes de contraste do tema indigo-pink (WCAG 2.1 AA, 4,5:1):
+ * o vermelho de erro padrão (#f44336) e o cinza dos rótulos ficam abaixo do
+ * mínimo sobre fundo branco/cinza. Usa os tokens do próprio Material.
+ */
+html {
+  --mat-form-field-outlined-label-text-color: rgba(0, 0, 0, 0.66);
+  --mat-form-field-filled-label-text-color: rgba(0, 0, 0, 0.66);
+  --mat-form-field-error-text-color: #b91c1c;
+  --mat-form-field-outlined-error-label-text-color: #b91c1c;
+  --mat-form-field-outlined-error-hover-label-text-color: #b91c1c;
+  --mat-form-field-outlined-error-focus-label-text-color: #b91c1c;
+  --mat-form-field-outlined-error-outline-color: #b91c1c;
+  --mat-form-field-outlined-error-hover-outline-color: #b91c1c;
+  --mat-form-field-outlined-error-focus-outline-color: #b91c1c;
+  --mat-form-field-outlined-error-caret-color: #b91c1c;
+}
+
+/*
+ * O .mat-typography (CSS sem camada) estiliza h1–h3 e venceria as classes
+ * do Tailwind (que ficam em @layer). revert-layer devolve esses títulos ao
+ * Tailwind, para a semântica dos títulos não mudar o visual.
+ */
+.mat-typography :is(h1, h2, h3):not(.mat-mdc-dialog-title) {
+  font: revert-layer;
+  letter-spacing: revert-layer;
+  margin: revert-layer;
+}

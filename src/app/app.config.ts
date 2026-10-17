@@ -26,7 +26,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
-    provideHttpClient(withFetch()), // Habilita Fetch APIm
+    provideHttpClient(withFetch()), // Habilita a Fetch API
     provideNgxMask(),
   ],
 };

@@ -4,7 +4,9 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
 
 import { DesaparecidosDetalheComponent } from './desaparecidos-detalhe.component';
 import { DesaparecidosState } from '../../state/desaparecidos.state';
@@ -83,6 +85,94 @@ describe('DesaparecidosDetalheComponent', () => {
     expect(texto).toContain('MARIA DA SILVA');
     expect(texto).toContain('Cuiabá - MT');
     expect(texto).toContain('Desaparecido');
+  });
+
+  it('usa o nome da pessoa no título da aba e no título da página', () => {
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+
+    criarComponente();
+
+    expect(TestBed.inject(Title).getTitle()).toBe(
+      'MARIA DA SILVA | Projeto Desaparecidos'
+    );
+    expect(elemento().querySelector('h2')?.textContent).toContain(
+      'MARIA DA SILVA'
+    );
+  });
+
+  it('calcula há quantos dias a pessoa está desaparecida', () => {
+    vi.useFakeTimers({ now: new Date('2024-01-20T10:00:00'), toFake: ['Date'] });
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+
+    criarComponente();
+
+    expect(component.dataPercorrida()).toBe(10);
+    expect(elemento().textContent).toContain('Desaparecido Há 10 Dias.');
+    vi.useRealTimers();
+  });
+
+  it('mostra os dados da localização quando a pessoa foi encontrada', () => {
+    state.idDetalhe = 7;
+    state.detalhePessoa = {
+      ...PESSOA,
+      ultimaOcorrencia: {
+        ...PESSOA.ultimaOcorrencia,
+        dataLocalizacao: new Date('2024-02-01T00:00:00'),
+        encontradoVivo: true,
+      },
+    } as IPessoas;
+
+    criarComponente();
+
+    const texto = elemento().textContent ?? '';
+    expect(texto).toContain('Localizado');
+    expect(texto).toContain('01/02/2024');
+    expect(texto).toContain('Encontrado Vivo? Sim');
+    expect(texto).not.toContain('Encontrou Essa Pessoa?');
+  });
+
+  it('volta para a lista pelo botão "Voltar para a lista"', () => {
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+    criarComponente();
+    const navigate = vi
+      .spyOn(TestBed.inject(Router), 'navigate')
+      .mockResolvedValue(true);
+
+    Array.from(elemento().querySelectorAll('button'))
+      .find((b) => b.textContent?.includes('Voltar para a lista'))
+      ?.click();
+
+    expect(navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('volta para a lista quando não há pessoa escolhida (página recarregada)', () => {
+    const navigate = vi
+      .spyOn(TestBed.inject(Router), 'navigate')
+      .mockResolvedValue(true);
+
+    criarComponente();
+
+    expect(navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('abre o formulário com a ocorrência e o nome da pessoa', () => {
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+    criarComponente();
+    const dialog = fixture.debugElement.injector.get(MatDialog);
+    const open = vi.spyOn(dialog, 'open').mockReturnValue(undefined as never);
+
+    component.openDialog();
+
+    expect(open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        data: { id: 99, descricao: 'MARIA DA SILVA' },
+      })
+    );
   });
 
   describe('carregamento a partir da API', () => {

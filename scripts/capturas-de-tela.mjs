@@ -6,6 +6,9 @@
 // Uso, com o app rodando (npm start ou o servidor SSR do build):
 //   npm i --no-save playwright && npx playwright install chromium
 //   node scripts/capturas-de-tela.mjs [baseUrl] [pastaSaida] [imagemParaUpload]
+//
+// Para usar um navegador já instalado em vez do Chromium do Playwright,
+// defina PW_CHANNEL (ex.: PW_CHANNEL=msedge no Windows, PW_CHANNEL=chrome).
 import { chromium } from 'playwright';
 
 const [
@@ -116,7 +119,7 @@ async function mockApi(page, { falhar = false } = {}) {
   });
 }
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ channel: process.env.PW_CHANNEL || undefined });
 
 async function novaPagina(viewport, opts) {
   const ctx = await browser.newContext({ viewport, deviceScaleFactor: 1, locale: 'pt-BR' });
@@ -160,7 +163,7 @@ const desktop = { width: 1366, height: 900 };
   // 4. Diálogo de envio de informações (preenchido, mas não enviado)
   await page.getByRole('button', { name: /Encontrou Essa Pessoa/ }).click();
   await page.waitForSelector('mat-dialog-container');
-  await page.fill('mat-dialog-container input[formcontrolname="informacao"]', 'Vi uma pessoa parecida perto da rodoviária.');
+  await page.fill('mat-dialog-container [formcontrolname="informacao"]', 'Vi uma pessoa parecida perto da rodoviária.');
   await page.locator('mat-dialog-container input[formcontrolname="data"]').pressSequentially('15102026');
   await page.setInputFiles('mat-dialog-container input[type="file"]', uploadImg);
   await page.waitForSelector('mat-dialog-container img');

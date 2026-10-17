@@ -11,8 +11,14 @@
   </button>
 </div>
 } @else if (pessoa(); as pessoa) {
+<div class="text-left">
+  <button mat-button type="button" class="mt-1" (click)="voltar()">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar para a lista
+  </button>
+</div>
 @if (pessoa.ultimaOcorrencia?.dataLocalizacao) {
-<span class="bg-green-600 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
+<span class="bg-green-700 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
   >Localizado</span
 >
 } @else{
@@ -24,27 +30,28 @@
 <div
   [ngClass]="
     pessoa.ultimaOcorrencia?.dataLocalizacao
-      ? 'border-green-600'
+      ? 'border-green-700'
       : 'border-red-600'
   "
-  class="flex flex-row py-2 border-4 rounded-lg px-2"
+  class="flex flex-col md:flex-row py-2 border-4 rounded-lg px-2"
 >
   <div>
     <img
       [src]="pessoa.urlFoto || './assets/semfoto.jpg'"
-      [alt]="'Imagem do indivíduo: ' + pessoa.nome"
-      height="128"
-      class="w-full h-120 object-cover p-2 max-w-lg"
+      [alt]="'Foto de ' + pessoa.nome"
+      width="512"
+      height="480"
+      class="w-full h-80 md:h-120 object-cover p-2 max-w-lg"
     />
   </div>
   <div class="flex flex-col text-left mt-1">
-    <div class="font-semibold text-2xl">{{ pessoa.nome }}</div>
+    <h2 class="font-semibold text-2xl">{{ pessoa.nome }}</h2>
     <div class="font-semibold text-xl">
       {{ pessoa.idade }} Anos - {{ pessoa.sexo }}
     </div>
     <hr class="my-2" />
 
-    <div class="font-semibold text-xl my-2">Dados sobre o Desaparecimento</div>
+    <h3 class="font-semibold text-xl my-2">Dados sobre o Desaparecimento</h3>
     @if(pessoa.ultimaOcorrencia?.dataLocalizacao){
     <div class="flex flex-row">
       <span class="pr-1 font-semibold">Data Localizado:</span>
@@ -85,11 +92,12 @@
       {{ pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao }}
     </div>
     }
-    <div class="py-2 font-bold text-xl text-red-500">
+    <div class="py-2 font-bold text-xl text-red-700">
       Desaparecido Há {{ dataPercorrida() }} Dias.
     </div>
     <button
-      class="!bg-red-600 w-60 py-3"
+      type="button"
+      class="!bg-red-700 w-60 py-3"
       (click)="openDialog()"
       mat-raised-button
     >
