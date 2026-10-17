@@ -187,6 +187,14 @@ describe('DesaparecidosDetalheDialogComponent', () => {
     expect(botao?.getAttribute('type')).toBe('button');
   });
 
+  it('rotula a data como o dia em que a pessoa foi vista', () => {
+    const rotulos = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('mat-label'),
+      (e) => e.textContent?.trim()
+    );
+    expect(rotulos).toContain('Data em que a pessoa foi vista');
+  });
+
   it('fecha sem enviar pelo botão "Fechar"', () => {
     component.onClose();
 
