@@ -3,9 +3,12 @@ import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
-import { DesaparecidosFacade } from './desaparecidos.facade';
+import {
+  DesaparecidosFacade,
+  MENSAGEM_ERRO_DETALHE,
+} from './desaparecidos.facade';
 import { DesaparecidosState } from './state/desaparecidos.state';
 import { DesaparecidosService } from '../../core/desaparecidos.service';
 import { AlertService } from '../../core/alert.service';
@@ -236,7 +239,63 @@ describe('DesaparecidosFacade', () => {
       expect(state.idDetalhe).toBe(7);
       expect(api.getArquivosDetalhe).toHaveBeenCalledExactlyOnceWith(7);
       expect(state.detalhePessoa).toEqual(pessoa);
+      expect(state.erroDetalhe).toBeNull();
       expect(router.navigate).toHaveBeenCalledExactlyOnceWith(['/detalhe']);
+    });
+
+    it('abre o detalhe e publica uma mensagem amigável quando a API falha', () => {
+      const erro = vi.spyOn(console, 'error').mockReturnValue(undefined);
+      api.getArquivosDetalhe.mockReturnValue(
+        throwError(() => new Error('offline'))
+      );
+
+      facade.getIdDetalhes(7);
+
+      expect(router.navigate).toHaveBeenCalledExactlyOnceWith(['/detalhe']);
+      expect(state.erroDetalhe).toBe(MENSAGEM_ERRO_DETALHE);
+      expect(state.detalhePessoa).toEqual({});
+      expect(erro).toHaveBeenCalled();
+    });
+
+    it('tentar de novo busca a mesma pessoa e limpa o erro', () => {
+      vi.spyOn(console, 'error').mockReturnValue(undefined);
+      const pessoa = { id: 7, nome: 'MARIA' } as IPessoas;
+      api.getArquivosDetalhe.mockReturnValueOnce(
+        throwError(() => new Error('offline'))
+      );
+      facade.getIdDetalhes(7);
+      api.getArquivosDetalhe.mockReturnValue(of(pessoa));
+
+      facade.tentarCarregarDetalheNovamente();
+
+      expect(api.getArquivosDetalhe).toHaveBeenCalledTimes(2);
+      expect(api.getArquivosDetalhe).toHaveBeenLastCalledWith(7);
+      expect(state.erroDetalhe).toBeNull();
+      expect(state.detalhePessoa).toEqual(pessoa);
+    });
+
+    it('não mostra a pessoa anterior enquanto a nova carrega', () => {
+      state.detalhePessoa = { id: 1, nome: 'JOÃO' } as IPessoas;
+      api.getArquivosDetalhe.mockReturnValue(new Subject<IPessoas>());
+
+      facade.getIdDetalhes(7);
+
+      expect(state.detalhePessoa).toEqual({});
+    });
+
+    it('ignora a resposta atrasada de um detalhe aberto antes', () => {
+      const primeira = new Subject<IPessoas>();
+      const segunda = new Subject<IPessoas>();
+      api.getArquivosDetalhe
+        .mockReturnValueOnce(primeira)
+        .mockReturnValueOnce(segunda);
+
+      facade.getIdDetalhes(1);
+      facade.getIdDetalhes(2);
+      segunda.next({ id: 2, nome: 'MARIA' } as IPessoas);
+      primeira.next({ id: 1, nome: 'JOÃO' } as IPessoas);
+
+      expect(state.detalhePessoa).toEqual({ id: 2, nome: 'MARIA' });
     });
   });
 

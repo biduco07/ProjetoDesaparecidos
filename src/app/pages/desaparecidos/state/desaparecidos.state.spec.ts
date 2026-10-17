@@ -26,6 +26,16 @@ describe('DesaparecidosState', () => {
     expect(emitidos).toEqual([null, 'Falhou', null]);
   });
 
+  it('começa sem erro no detalhe e emite a mensagem quando ele falha', () => {
+    const emitidos: (string | null)[] = [];
+    state.erroDetalhe$.subscribe((v) => emitidos.push(v));
+
+    state.erroDetalhe = 'Falhou';
+
+    expect(state.erroDetalhe).toBe('Falhou');
+    expect(emitidos).toEqual([null, 'Falhou']);
+  });
+
   it('emite o novo valor para quem está inscrito ao alterar a paginação', () => {
     const emitidos: Paginacao[] = [];
     state.controlePaginacao$.subscribe((v) => emitidos.push(v));

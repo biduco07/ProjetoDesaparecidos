@@ -24,6 +24,7 @@ _Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 - Listagem em cards com paginação (12 registros por página).
 - Filtros por nome, faixa etária, sexo e status (desaparecido/localizado).
 - Tela de detalhe com situação do caso, local e data do desaparecimento e há quantos dias a pessoa está desaparecida.
+- Se a API falhar, a lista e a tela de detalhe mostram uma mensagem amigável com o botão "Tentar de novo".
 - Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens.
 - Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
 

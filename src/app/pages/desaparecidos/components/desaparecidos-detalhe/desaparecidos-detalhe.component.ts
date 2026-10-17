@@ -13,13 +13,23 @@ import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-detalhe-dialog.component';
 
 const UM_DIA_EM_MS = 1000 * 60 * 60 * 24;
 
 @Component({
   selector: 'app-desaparecidos-detalhe',
-  imports: [DatePipe, NgClass, MatCardModule, MatButtonModule, MatDialogModule],
+  imports: [
+    DatePipe,
+    NgClass,
+    MatCardModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   standalone: true,
   templateUrl: './desaparecidos-detalhe.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +50,9 @@ export class DesaparecidosDetalheComponent {
     { initialValue: null }
   );
 
+  /** Mensagem amigável quando a busca da pessoa falha (null = sem erro). */
+  readonly erro = toSignal(this._facade.erroDetalhe$, { initialValue: null });
+
   /** Dias (arredondados) desde a data do desaparecimento. */
   readonly dataPercorrida = computed(() => {
     const data = this.pessoa()?.ultimaOcorrencia?.dtDesaparecimento;
@@ -59,6 +72,10 @@ export class DesaparecidosDetalheComponent {
           this.router.navigate(['/']);
         }
       });
+  }
+
+  tentarNovamente(): void {
+    this._facade.tentarCarregarDetalheNovamente();
   }
 
   openDialog(): void {
