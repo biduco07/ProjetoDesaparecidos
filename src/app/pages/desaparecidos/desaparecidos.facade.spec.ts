@@ -1,3 +1,4 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
@@ -45,6 +46,11 @@ describe('DesaparecidosFacade', () => {
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
     router.navigate.and.resolveTo(true);
 
+    configurar('browser');
+  });
+
+  /** Monta a facade como se rodasse no navegador ou no servidor (SSR/build). */
+  function configurar(plataforma: 'browser' | 'server'): void {
     TestBed.configureTestingModule({
       providers: [
         DesaparecidosFacade,
@@ -52,12 +58,13 @@ describe('DesaparecidosFacade', () => {
         { provide: DesaparecidosService, useValue: api },
         { provide: AlertService, useValue: alert },
         { provide: Router, useValue: router },
+        { provide: PLATFORM_ID, useValue: plataforma },
       ],
     });
 
     facade = TestBed.inject(DesaparecidosFacade);
     state = TestBed.inject(DesaparecidosState);
-  });
+  }
 
   describe('carregamento inicial', () => {
     it('busca lista e estatísticas e publica no state', () => {
@@ -77,6 +84,18 @@ describe('DesaparecidosFacade', () => {
       expect(api.getEstatisticas).toHaveBeenCalledTimes(1);
       expect(listaEmitida).toEqual(pagina);
       expect(estatisticasEmitidas).toEqual(estatisticas);
+    });
+
+    it('não chama a API na renderização no servidor (pré-renderização do build)', () => {
+      // Os dados buscados no build ficariam congelados no HTML estático
+      // (e no TransferState); quem busca é o navegador, sempre atualizado.
+      TestBed.resetTestingModule();
+      configurar('server');
+
+      facade.loadInitialData();
+
+      expect(api.getArquivos).not.toHaveBeenCalled();
+      expect(api.getEstatisticas).not.toHaveBeenCalled();
     });
 
     it('mantém a lista e publica uma mensagem amigável quando a consulta falha', () => {

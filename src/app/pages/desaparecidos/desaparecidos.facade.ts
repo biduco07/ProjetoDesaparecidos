@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { DesaparecidosService } from '../../core/desaparecidos.service';
 import { DesaparecidosState } from './state/desaparecidos.state';
@@ -29,7 +30,8 @@ export class DesaparecidosFacade {
     private _api: DesaparecidosService,
     private _state: DesaparecidosState,
     private _alert: AlertService,
-    private _router: Router
+    private _router: Router,
+    @Inject(PLATFORM_ID) private _platformId: object
   ) {
     // Link Observables
     this.localizadosDesaparecidos$ = this._state.localizadosDesaparecidos$;
@@ -42,6 +44,12 @@ export class DesaparecidosFacade {
   }
 
   loadInitialData(): void {
+    // Na renderização no servidor (pré-renderização do build) não buscamos
+    // dados: eles ficariam congelados no HTML estático e no TransferState.
+    // O navegador busca dados atualizados assim que a página carrega.
+    if (!isPlatformBrowser(this._platformId)) {
+      return;
+    }
     this.consultarDesaparecidos();
     this.consultarEstatisticas();
   }
