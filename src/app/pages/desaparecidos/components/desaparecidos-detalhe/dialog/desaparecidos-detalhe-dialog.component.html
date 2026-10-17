@@ -45,20 +45,21 @@
     </div>
 
     <div class="pt-2 px-4">
-      <div *ngIf="imagens.length">
+      @if (imagens.length) {
+      <div>
         <h3>Imagens Salvas:</h3>
         <div class="flex flex-wrap gap-2">
-          <div *ngFor="let imagem of imagens; let i = index" class="relative">
-            <img
-              *ngIf="imagem.preview"
-              [src]="imagem.preview"
-              alt="Imagem {{ i + 1 }}"
-              width="200"
-            />
+          @for (imagem of imagens; track imagem; let i = $index) {
+          <div class="relative">
+            @if (imagem.preview) {
+            <img [src]="imagem.preview" alt="Imagem {{ i + 1 }}" width="200" />
+            }
             <button (click)="removeImage(i)" class="delete-btn">X</button>
           </div>
+          }
         </div>
       </div>
+      }
     </div>
   </form>
 </mat-dialog-content>
