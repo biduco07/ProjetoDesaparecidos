@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -12,7 +13,6 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { DesaparecidosFacade } from '../desaparecidos.facade';
-import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { IEstatisticas } from '../models/estatisticas.model';
 import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado';
@@ -48,20 +48,20 @@ export class DesaparecidosComponent {
   paginacao!: Paginacao;
   formularioConsulta!: IConsulta;
 
-  private _unsubscribeFlag$: Subject<any> = new Subject<any>();
-
   constructor(private _facade: DesaparecidosFacade, private _fb: FormBuilder) {
     this.criarForm();
     this._facade.loadInitialData();
 
+    // takeUntilDestroyed() usa o DestroyRef do componente: as inscrições são
+    // encerradas automaticamente quando o componente é destruído.
     this._facade.localizadosDesaparecidos$
-      .pipe(takeUntil(this._unsubscribeFlag$))
+      .pipe(takeUntilDestroyed())
       .subscribe((value: IEstatisticas) => {
         this.localizadosDesaparecidos = value;
       });
 
     this._facade.listaPessoas$
-      .pipe(takeUntil(this._unsubscribeFlag$))
+      .pipe(takeUntilDestroyed())
       .subscribe((value: ResultadoPaginado<IPessoas>) => {
         if (value?.content) {
           this.listaPessoas = value;
@@ -69,13 +69,13 @@ export class DesaparecidosComponent {
       });
 
     this._facade.controlePaginacao$
-      .pipe(takeUntil(this._unsubscribeFlag$))
+      .pipe(takeUntilDestroyed())
       .subscribe((value: Paginacao) => {
         this.paginacao = value;
       });
 
     this._facade.formularioConsulta$
-      .pipe(takeUntil(this._unsubscribeFlag$))
+      .pipe(takeUntilDestroyed())
       .subscribe((value: IConsulta) => {
         if (value) {
           this.formularioConsulta = value;
