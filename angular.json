@@ -60,6 +60,13 @@
               ],
               "outputHashing": "all"
             },
+            "pages": {
+              "outputPath": {
+                "base": "docs",
+                "browser": ""
+              },
+              "outputMode": "static"
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
