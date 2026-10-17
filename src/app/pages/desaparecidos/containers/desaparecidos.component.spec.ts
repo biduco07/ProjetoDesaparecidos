@@ -73,6 +73,139 @@ describe('DesaparecidosComponent', () => {
     observables.forEach((obs) => expect(obs.observed).toBe(false));
   });
 
+  describe('lista de pessoas', () => {
+    const pessoa = (id: number, nome: string) =>
+      ({
+        id,
+        nome,
+        idade: 30,
+        sexo: 'FEMININO',
+        urlFoto: null,
+        ultimaOcorrencia: {
+          dtDesaparecimento: new Date('2024-01-10T10:00:00'),
+          localDesaparecimentoConcat: 'Cuiabá - MT',
+        },
+      }) as IPessoas;
+
+    function elemento(): HTMLElement {
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    beforeEach(() => {
+      facade.listaPessoas$.next({
+        content: [pessoa(1, 'MARIA'), pessoa(2, 'JOÃO')],
+        totalElements: 25,
+      });
+      fixture.detectChanges();
+    });
+
+    it('mostra os totalizadores', () => {
+      const texto = elemento().textContent ?? '';
+      expect(texto).toContain('Desaparecidos: 10');
+      expect(texto).toContain('Localizados: 5');
+    });
+
+    it('renderiza um item de lista com botão por pessoa', () => {
+      const botoes = elemento().querySelectorAll('li mat-card h3 button');
+      expect(Array.from(botoes).map((b) => b.textContent?.trim())).toEqual([
+        'MARIA',
+        'JOÃO',
+      ]);
+      expect(elemento().textContent).toContain('10/01/2024 10:00');
+      expect(elemento().textContent).toContain('Cuiabá - MT');
+    });
+
+    it('abre o detalhe pelo botão do card (teclado e clique)', () => {
+      elemento()
+        .querySelectorAll<HTMLButtonElement>('li mat-card h3 button')[1]
+        .click();
+
+      expect(facade.getIdDetalhes).toHaveBeenCalledWith(2);
+    });
+
+    it('anuncia a quantidade de resultados para o leitor de tela', () => {
+      expect(
+        elemento().querySelector('#resumo-resultados')?.textContent?.trim()
+      ).toBe('25 pessoas encontradas.');
+    });
+
+    it('mostra uma mensagem quando a consulta não encontra ninguém', () => {
+      facade.listaPessoas$.next({ content: [], totalElements: 0 });
+      fixture.detectChanges();
+
+      expect(elemento().textContent).toContain(
+        'Nenhuma pessoa encontrada com esses filtros.'
+      );
+      expect(component.resumoResultados()).toBe('Nenhuma pessoa encontrada.');
+    });
+
+    it('usa os textos do paginador em português', () => {
+      expect(elemento().querySelector('mat-paginator')?.textContent).toContain(
+        '1 – 12 de 25'
+      );
+      expect(
+        elemento()
+          .querySelector('.mat-mdc-paginator-navigation-next')
+          ?.getAttribute('aria-label')
+      ).toBe('Próxima página');
+    });
+
+    it('repassa a troca de página para a facade', () => {
+      component.handlePagination({ pageIndex: 1, pageSize: 12, length: 25 });
+
+      expect(facade.handlePagination).toHaveBeenCalledWith(
+        expect.objectContaining({ pageIndex: 1 })
+      );
+    });
+  });
+
+  describe('filtros', () => {
+    function form(): HTMLFormElement {
+      return (fixture.nativeElement as HTMLElement).querySelector('form')!;
+    }
+
+    it('consulta com os filtros ao enviar o formulário (Enter ou "Consultar")', () => {
+      component.form.patchValue({ nome: 'MARIA', sexo: 'FEMININO' });
+
+      form().dispatchEvent(new Event('submit'));
+
+      expect(facade.adicionarFormularioState).toHaveBeenCalledWith(
+        expect.objectContaining({ nome: 'MARIA', sexo: 'FEMININO' })
+      );
+      expect(facade.resetPagination).toHaveBeenCalled();
+      expect(facade.consultarDesaparecidos).toHaveBeenCalled();
+    });
+
+    it('"Limpar" zera os filtros e consulta de novo', () => {
+      component.form.patchValue({ nome: 'MARIA' });
+
+      component.resetForm();
+
+      expect(component.form.value.nome).toBeNull();
+      expect(facade.consultarDesaparecidos).toHaveBeenCalled();
+    });
+
+    it('restaura os filtros salvos no state ao voltar do detalhe', () => {
+      facade.formularioConsulta$.next({
+        nome: 'JOÃO',
+        status: 'LOCALIZADO',
+      } as IConsulta);
+
+      expect(component.form.value).toEqual(
+        expect.objectContaining({ nome: 'JOÃO', status: 'LOCALIZADO' })
+      );
+    });
+
+    it('associa cada campo a um rótulo', () => {
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('label[for="filtro-nome"]')).not.toBeNull();
+      expect(el.querySelector('#filtro-nome')).not.toBeNull();
+      el.querySelectorAll('mat-radio-group').forEach((grupo) =>
+        expect(grupo.getAttribute('aria-labelledby')).toMatch(/^filtro-/)
+      );
+    });
+  });
+
   describe('quando a API falha', () => {
     const mensagem = 'Não foi possível carregar a lista de pessoas.';
 
