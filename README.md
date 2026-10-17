@@ -129,4 +129,4 @@ git commit -m "build(pages): regenera docs/"
 
 Depois do merge em `main`, o Pages republica sozinho em alguns minutos.
 
-O script usa a configuração `pages` do `angular.json` (`outputMode: "static"`, arquivos do navegador direto em `docs/`, sem a pasta `server`) e `--base-href /ProjetoDesaparecidos/`, o subcaminho do repositório no Pages. Não é preciso `404.html` nem `.nojekyll`: as duas rotas (`/` e `/detalhe`) são pré-renderizadas como `index.html` e `detalhe/index.html`, e nenhum arquivo gerado começa com `_` (o que o Jekyll do Pages ignoraria).
+O script usa a configuração `pages` do `angular.json` (`outputMode: "static"`, arquivos do navegador direto em `docs/`, sem a pasta `server`) e `--base-href /ProjetoDesaparecidos/`, o subcaminho do repositório no Pages. Não é preciso `404.html` nem `.nojekyll`: as duas rotas (`/` e `/detalhe`) são pré-renderizadas como `index.html` e `detalhe/index.html`, e nenhum arquivo gerado começa com `_` (o que o Jekyll do Pages ignoraria). Como o detalhe depende da pessoa escolhida na lista, `detalhe/index.html` é só um redirecionamento para a lista (quem recarrega a página de detalhe volta para a listagem).
