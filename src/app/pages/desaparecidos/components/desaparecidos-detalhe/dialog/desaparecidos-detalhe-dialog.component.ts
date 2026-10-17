@@ -19,12 +19,11 @@ import { MatInputModule } from '@angular/material/input';
 import { DesaparecidosFacade } from '../../../desaparecidos.facade';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import * as moment from 'moment';
 import { NgxMaskDirective } from 'ngx-mask';
 import { AlertService } from '../../../../../core/alert.service';
 
 @Component({
-  selector: 'desaparecidos-detalhe-dialog',
+  selector: 'app-desaparecidos-detalhe-dialog',
   imports: [
     CommonModule,
     MatCardModule,
@@ -93,7 +92,7 @@ export class DesaparecidosDetalheDialogComponent {
   }
 
   onSend(): void {
-    let formData: FormData = new FormData();
+    const formData = new FormData();
     const dataConvertida = this.convertDate(this.form.value.data);
     if (this.form.value.informacao.length == 0) {
       this._alert.showError('Campo Informação obrigatório!');
@@ -102,8 +101,8 @@ export class DesaparecidosDetalheDialogComponent {
       formData.append('descricao', this.form.value.descricao);
       formData.append('informacao', this.form.value.informacao);
       formData.append('data', dataConvertida);
-      for (let i = 0; i < this.selectedFiles.length; i++) {
-        formData.append('files', this.selectedFiles[i]);
+      for (const file of this.selectedFiles) {
+        formData.append('files', file);
       }
       this.dialogRef.close();
       this.form.reset();

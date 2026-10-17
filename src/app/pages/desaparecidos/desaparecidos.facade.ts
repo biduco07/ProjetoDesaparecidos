@@ -91,10 +91,10 @@ export class DesaparecidosFacade {
 
   postOcorrencia(form: FormData): void {
     this._api.postOcorrencia(form).subscribe({
-      next: (res) => {
+      next: () => {
         this._alert.showSuccess('Informações Adicionada com Sucesso.');
       },
-      error: (error) => {
+      error: () => {
         this._alert.showError('Erro ao Adicionar Informações.');
       },
     });

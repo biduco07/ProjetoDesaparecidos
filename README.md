@@ -1,5 +1,7 @@
 # Projeto Desaparecidos
 
+[![CI](https://github.com/biduco07/ProjetoDesaparecidos/actions/workflows/ci.yml/badge.svg)](https://github.com/biduco07/ProjetoDesaparecidos/actions/workflows/ci.yml)
+
 Aplicação web para consulta de pessoas desaparecidas e localizadas no estado de Mato Grosso, consumindo a API pública **Abitus** da Polícia Judiciária Civil de MT. Permite buscar registros com filtros, ver os detalhes de cada caso e enviar informações sobre uma pessoa (texto, data e fotos).
 
 Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — vaga **Front-End Sênior**, por Pedro Henrique Veloso Silva de Melo.
@@ -32,7 +34,7 @@ _Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [RxJS](https://rxjs.dev/)
 - [NgxMask](https://github.com/JsDaddy/ngx-mask)
-- Testes com Karma + Jasmine
+- Testes com Karma + Jasmine; lint com [angular-eslint](https://github.com/angular-eslint/angular-eslint)
 - [Docker](https://www.docker.com/) + nginx para servir o build
 
 ## Arquitetura: Facade + State
@@ -68,6 +70,7 @@ src/
     shared/
       paginacao/                # modelos de paginação
   assets/
+  environments/                 # configuração por ambiente (URL da API)
 ```
 
 ## Como rodar
@@ -85,11 +88,19 @@ A aplicação fica disponível em `http://localhost:4200/`.
 
 ### Scripts
 
-| Comando         | Descrição                                   |
-| --------------- | ------------------------------------------- |
-| `npm start`     | Servidor de desenvolvimento                 |
-| `npm test`      | Testes unitários (Karma + Jasmine)          |
-| `npm run build` | Build de produção em `dist/projeto-desaparecidos` |
+| Comando           | Descrição                                          |
+| ----------------- | -------------------------------------------------- |
+| `npm start`       | Servidor de desenvolvimento                        |
+| `npm test`        | Testes unitários (Karma + Jasmine) em modo watch   |
+| `npm run test:ci` | Testes uma única vez em Chrome headless            |
+| `npm run lint`    | ESLint com as regras do angular-eslint             |
+| `npm run build`   | Build de produção em `dist/projeto-desaparecidos`  |
+
+### Qualidade e CI
+
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo push para `main`/`dev` e em pull requests: `npm ci`, lint, testes em Chrome headless e build de produção.
+
+Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações) e os componentes principais.
 
 ### Docker
 
