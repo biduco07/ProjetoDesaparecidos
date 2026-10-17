@@ -25,7 +25,7 @@ _Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 - Filtros por nome, faixa etária, sexo e status (desaparecido/localizado).
 - Tela de detalhe com situação do caso, local e data do desaparecimento e há quantos dias a pessoa está desaparecida.
 - Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens.
-- Renderização no servidor (Angular SSR) com pré-renderização das rotas.
+- Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
 
 ## Stack
 
@@ -90,13 +90,14 @@ A aplicação fica disponível em `http://localhost:4200/`.
 
 ### Scripts
 
-| Comando           | Descrição                                          |
-| ----------------- | -------------------------------------------------- |
-| `npm start`       | Servidor de desenvolvimento                        |
-| `npm test`        | Testes unitários (Karma + Jasmine) em modo watch   |
-| `npm run test:ci` | Testes uma única vez em Chrome headless            |
-| `npm run lint`    | ESLint com as regras do angular-eslint             |
-| `npm run build`   | Build de produção em `dist/projeto-desaparecidos`  |
+| Comando               | Descrição                                           |
+| --------------------- | --------------------------------------------------- |
+| `npm start`           | Servidor de desenvolvimento                         |
+| `npm test`            | Testes unitários (Karma + Jasmine) em modo watch    |
+| `npm run test:ci`     | Testes uma única vez em Chrome headless             |
+| `npm run lint`        | ESLint com as regras do angular-eslint              |
+| `npm run build`       | Build de produção em `dist/projeto-desaparecidos`   |
+| `npm run build:pages` | Build de produção da demo em `docs/` (GitHub Pages) |
 
 ### Qualidade e CI
 
@@ -114,3 +115,17 @@ docker run -d -p 8080:80 --name projeto-desaparecidos projeto-desaparecidos
 ```
 
 A aplicação fica disponível em `http://localhost:8080/`.
+
+### Publicação da demo (GitHub Pages)
+
+A demo em https://biduco07.github.io/ProjetoDesaparecidos/ é servida pelo GitHub Pages a partir da pasta [`docs/`](docs) do branch `main`. Para atualizá-la:
+
+```sh
+npm run build:pages   # apaga e regenera docs/ com o build de produção
+git add docs
+git commit -m "build(pages): regenera docs/"
+```
+
+Depois do merge em `main`, o Pages republica sozinho em alguns minutos.
+
+O script usa a configuração `pages` do `angular.json` (`outputMode: "static"`, arquivos do navegador direto em `docs/`, sem a pasta `server`) e `--base-href /ProjetoDesaparecidos/`, o subcaminho do repositório no Pages. Não é preciso `404.html` nem `.nojekyll`: as duas rotas (`/` e `/detalhe`) são pré-renderizadas como `index.html` e `detalhe/index.html`, e nenhum arquivo gerado começa com `_` (o que o Jekyll do Pages ignoraria).
