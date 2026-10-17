@@ -1,106 +1,104 @@
-# 🚀 Projeto Desaparecidos
+# Projeto Desaparecidos
 
-# PROCESSO SELETIVO SEPLAG.
+Aplicação web para consulta de pessoas desaparecidas e localizadas no estado de Mato Grosso, consumindo a API pública **Abitus** da Polícia Judiciária Civil de MT. Permite buscar registros com filtros, ver os detalhes de cada caso e enviar informações sobre uma pessoa (texto, data e fotos).
 
-## Dados De Inscrição
+Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — vaga **Front-End Sênior**, por Pedro Henrique Veloso Silva de Melo.
 
-- **Nome:** Pedro Henrique Veloso Silva de Melo
-- **Telefone:** (65)98111-8169
-- **Email:** pedrohenriquevelososilvademelo@gmail.com
-- **Vaga:** Front-End Sênior
+**Demo:** https://biduco07.github.io/ProjetoDesaparecidos/
 
-## 🛠 Tecnologias Utilizadas
+## Capturas de tela
 
-- ⚡ [Angular 19.2.3](https://angular.io/)
-- 🎨 [Angular Material](https://material.angular.io/)
-- 🎭 [NgxMask](https://github.com/JsDaddy/ngx-mask)
-- 🔄 [RxJS](https://rxjs.dev/)
-- 🐳 [Docker](https://www.docker.com/)
-- 🏗 **Gerenciador de estado:** Implementado seguindo a Arquitetura Facade com State, garantindo encapsulamento, separação de responsabilidades e melhor organização do fluxo de dados da aplicação.
+<!--
+  Espaço reservado para prints/GIF da aplicação. Exemplo:
+  ![Listagem com filtros](screenshots/listagem.png)
+  ![Detalhe de uma pessoa](screenshots/detalhe.png)
+-->
 
-## Versões Utilizadas
+_Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 
-- Angular (versão 19.2.3)
-- Node.js (versão 22.14.0)
-- Angular CLI (versão 19.2.4)
-- Tailwindcss (versão 4)
+## Funcionalidades
 
-## Demo do Projeto
+- Totalizadores de pessoas desaparecidas e localizadas.
+- Listagem em cards com paginação (12 registros por página).
+- Filtros por nome, faixa etária, sexo e status (desaparecido/localizado).
+- Tela de detalhe com situação do caso, local e data do desaparecimento e há quantos dias a pessoa está desaparecida.
+- Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens.
+- Renderização no servidor (Angular SSR) com pré-renderização das rotas.
 
-- https://biduco07.github.io/ProjetoDesaparecidos/
+## Stack
 
-## 📥 Instalação
+- [Angular 19](https://angular.dev/) (standalone components, novo control flow `@if`/`@for`, SSR)
+- [Angular Material](https://material.angular.io/)
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [RxJS](https://rxjs.dev/)
+- [NgxMask](https://github.com/JsDaddy/ngx-mask)
+- Testes com Karma + Jasmine
+- [Docker](https://www.docker.com/) + nginx para servir o build
 
-1. Clone este repositório:
-   ```sh
-   git clone https://github.com/biduco07/ProjetoDesaparecidos.git
-   ```
-2. Acesse a pasta do projeto:
-   ```sh
-   cd ProjetoDesaparecidos
-   ```
-3. Instale as dependências:
-   ```sh
-   npm install
-   ```
+## Arquitetura: Facade + State
 
-## ▶️ Como Rodar o Projeto
+O fluxo de dados da feature `desaparecidos` segue o padrão **Facade com State**, sem biblioteca externa de gerenciamento de estado:
 
-Para rodar o projeto localmente, utilize:
+```
+Componente  ──comandos──▶  Facade  ──HTTP──▶  DesaparecidosService  ──▶  API Abitus
+    ▲                        │
+    └──── observables ◀── State (BehaviorSubjects)
+```
+
+- **Service** (`core/desaparecidos.service.ts`): única camada que conhece a API HTTP.
+- **State** (`pages/desaparecidos/state/desaparecidos.state.ts`): fonte única da verdade da feature (lista paginada, estatísticas, paginação, filtros e pessoa selecionada), exposta como `Observable` somente leitura.
+- **Facade** (`pages/desaparecidos/desaparecidos.facade.ts`): API pública da feature para os componentes. Orquestra chamadas ao serviço, atualiza o state e trata erros/navegação.
+- **Componentes** apenas disparam comandos na facade e se inscrevem nos observables; não acessam o serviço nem o state diretamente.
+
+Isso mantém os componentes simples, concentra regras de negócio em um único ponto e facilita testar cada camada isoladamente.
+
+## Estrutura de pastas
+
+```
+src/
+  app/
+    core/                       # serviços globais (API Abitus, alertas)
+    pages/
+      desaparecidos/
+        components/             # tela de detalhe e diálogo de envio de informações
+        containers/             # página de listagem e filtros
+        models/                 # interfaces de domínio
+        state/                  # DesaparecidosState (BehaviorSubjects)
+        desaparecidos.facade.ts # Facade da feature
+    shared/
+      paginacao/                # modelos de paginação
+  assets/
+```
+
+## Como rodar
+
+Pré-requisitos: Node.js 22 (LTS) e npm.
 
 ```sh
-ng serve
+git clone https://github.com/biduco07/ProjetoDesaparecidos.git
+cd ProjetoDesaparecidos
+npm ci
+npm start
 ```
 
-A aplicação estará disponível em `http://localhost:4200/`.
+A aplicação fica disponível em `http://localhost:4200/`.
 
-### 🐳 Rodando o Projeto Utilizando Docker
+### Scripts
 
-Com o docker instalado na maquina, Para subir o ambiente (caso já tenha feito a instação, pula para o passo 3):
+| Comando         | Descrição                                   |
+| --------------- | ------------------------------------------- |
+| `npm start`     | Servidor de desenvolvimento                 |
+| `npm test`      | Testes unitários (Karma + Jasmine)          |
+| `npm run build` | Build de produção em `dist/projeto-desaparecidos` |
 
-1. Clone este repositório:
+### Docker
 
-   ```sh
-   git clone https://github.com/biduco07/ProjetoDesaparecidos.git
-   ```
+Com o Docker instalado, gere o build e a imagem e suba o container:
 
-2. Acesse a pasta do projeto:
-
-   ```sh
-   cd ProjetoDesaparecidos
-   ```
-
-3. Utilize o comando para carregar a imagem do docker:
-
-   ```sh
-   docker load -i projeto-desaparecidos.tar
-   ```
-
-4. Para levantar o container é só utilizar o comando:
-   ```sh
-   docker container run -d -it -p 80:80 projeto-desaparecidos
-   ```
-
-A aplicação estará disponível em `http://localhost/` ou `http://127.0.0.1/`.
-
-## 📂 Estrutura do Projeto
-
-Breve descrição da estrutura de pastas do projeto.
-
+```sh
+npm run build
+docker build -t projeto-desaparecidos .
+docker run -d -p 8080:80 --name projeto-desaparecidos projeto-desaparecidos
 ```
-/src
-  /app
-    /core (Services globais)
-    /pages
-      /desaparecidos
-        /components
-        /containers
-        /models
-        /services
-        /shared
-        /state
-        /facade (Implementação da Arquitetura Facade com State)
-    /shared
-      /paginacao (Model de paginação)
-    /assets
-```
+
+A aplicação fica disponível em `http://localhost:8080/`.
