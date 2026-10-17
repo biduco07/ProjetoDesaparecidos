@@ -1,10 +1,10 @@
 <div class="flex flex-row justify-evenly py-3 pb-5">
-  @if(localizadosDesaparecidos){
+  @if (localizadosDesaparecidos(); as totais) {
   <div class="text-xl">
-    Desaparecidos: {{ localizadosDesaparecidos.quantPessoasDesaparecidas }}
+    Desaparecidos: {{ totais.quantPessoasDesaparecidas }}
   </div>
   <div class="text-xl">
-    Localizados: {{ localizadosDesaparecidos.quantPessoasEncontradas }}
+    Localizados: {{ totais.quantPessoasEncontradas }}
   </div>
   }
 </div>
@@ -92,21 +92,21 @@
   </div>
 
   <div class="w-full md:w-9/12 px-2">
-    @if (erroConsulta) {
+    @if (erroConsulta(); as erro) {
     <div
       role="alert"
       class="flex flex-col items-center gap-3 rounded-lg border border-red-300 bg-red-50 p-6 text-red-800"
     >
       <mat-icon aria-hidden="true">error_outline</mat-icon>
-      <p>{{ erroConsulta }}</p>
+      <p>{{ erro }}</p>
       <button mat-raised-button type="button" (click)="tentarNovamente()">
         <mat-icon>refresh</mat-icon>
         Tentar de novo
       </button>
     </div>
-    } @else if(listaPessoas){
+    } @else if (listaPessoas(); as pagina) {
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-      @for(lista of listaPessoas.content; track $index){
+      @for (lista of pagina.content; track $index) {
       <mat-card
         (click)="abrirDetalhes(lista.id)"
         class="example-card cursor-pointer"
@@ -141,10 +141,10 @@
     </div>
     <mat-paginator
       class="w-full"
-      [pageIndex]="paginacao.page"
-      [pageSize]="paginacao.size"
+      [pageIndex]="paginacao().page"
+      [pageSize]="paginacao().size"
       (page)="handlePagination($event)"
-      [length]="listaPessoas.totalElements"
+      [length]="pagina.totalElements"
     ></mat-paginator>
     } @else{
     <div class="spinner-container">

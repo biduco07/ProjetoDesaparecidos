@@ -15,6 +15,7 @@ export class DesaparecidosState {
   private _formularioConsulta$!: BehaviorSubject<IConsulta>;
   private _idDetalhe$!: BehaviorSubject<number>;
   private _erroConsulta$!: BehaviorSubject<string | null>;
+  private _erroDetalhe$!: BehaviorSubject<string | null>;
 
   constructor() {
     this._localizadosDesaparecidos$ = new BehaviorSubject<IEstatisticas>(
@@ -32,6 +33,7 @@ export class DesaparecidosState {
     this._formularioConsulta$ = new BehaviorSubject<IConsulta>({} as IConsulta);
     this._idDetalhe$ = new BehaviorSubject<number>({} as number);
     this._erroConsulta$ = new BehaviorSubject<string | null>(null);
+    this._erroDetalhe$ = new BehaviorSubject<string | null>(null);
   }
   // Visualizar localizadosDesaparecidos
   get localizadosDesaparecidos$(): Observable<IEstatisticas> {
@@ -108,5 +110,16 @@ export class DesaparecidosState {
   }
   set erroConsulta(value: string | null) {
     this._erroConsulta$.next(value);
+  }
+
+  // Mensagem exibida quando o detalhe da pessoa não carrega (null = sem erro)
+  get erroDetalhe$(): Observable<string | null> {
+    return this._erroDetalhe$.asObservable();
+  }
+  get erroDetalhe(): string | null {
+    return this._erroDetalhe$.value;
+  }
+  set erroDetalhe(value: string | null) {
+    this._erroDetalhe$.next(value);
   }
 }

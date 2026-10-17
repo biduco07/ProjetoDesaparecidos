@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -13,19 +13,17 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { DesaparecidosFacade } from '../desaparecidos.facade';
-import { CommonModule } from '@angular/common';
-import { IEstatisticas } from '../models/estatisticas.model';
-import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado';
-import { IPessoas } from '../models/pessoas.model';
+import { DatePipe } from '@angular/common';
+import { filter } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { Paginacao } from '../../../shared/paginacao/paginacao';
 import { IConsulta } from '../models/consulta.model';
 @Component({
   selector: 'app-desaparecidos',
   templateUrl: './desaparecidos.component.html',
   styleUrl: './desaparecidos.component.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatButtonModule,
     MatSelectModule,
@@ -35,46 +33,41 @@ import { IConsulta } from '../models/consulta.model';
     MatRadioModule,
     MatIconModule,
     MatCardModule,
-    CommonModule,
+    DatePipe,
     MatProgressSpinnerModule,
     MatPaginatorModule,
   ],
 })
 export class DesaparecidosComponent {
+  private _facade = inject(DesaparecidosFacade);
+  private _fb = inject(FormBuilder);
+
   form!: FormGroup;
-
-  localizadosDesaparecidos!: IEstatisticas;
-  listaPessoas!: ResultadoPaginado<IPessoas>;
-  paginacao!: Paginacao;
   formularioConsulta!: IConsulta;
-  erroConsulta: string | null = null;
 
-  constructor(private _facade: DesaparecidosFacade, private _fb: FormBuilder) {
+  // toSignal() se inscreve agora e encerra a inscrição quando o componente
+  // é destruído; cada nova emissão marca a view para checagem (OnPush).
+  readonly localizadosDesaparecidos = toSignal(
+    this._facade.localizadosDesaparecidos$
+  );
+  /** Última página válida; um valor sem `content` não apaga a lista atual. */
+  readonly listaPessoas = toSignal(
+    this._facade.listaPessoas$.pipe(filter((value) => !!value?.content))
+  );
+  readonly paginacao = toSignal(this._facade.controlePaginacao$, {
+    requireSync: true,
+  });
+  readonly erroConsulta = toSignal(this._facade.erroConsulta$, {
+    initialValue: null,
+  });
+
+  constructor() {
     this.criarForm();
     this._facade.loadInitialData();
 
-    // takeUntilDestroyed() usa o DestroyRef do componente: as inscrições são
-    // encerradas automaticamente quando o componente é destruído.
-    this._facade.localizadosDesaparecidos$
-      .pipe(takeUntilDestroyed())
-      .subscribe((value: IEstatisticas) => {
-        this.localizadosDesaparecidos = value;
-      });
-
-    this._facade.listaPessoas$
-      .pipe(takeUntilDestroyed())
-      .subscribe((value: ResultadoPaginado<IPessoas>) => {
-        if (value?.content) {
-          this.listaPessoas = value;
-        }
-      });
-
-    this._facade.controlePaginacao$
-      .pipe(takeUntilDestroyed())
-      .subscribe((value: Paginacao) => {
-        this.paginacao = value;
-      });
-
+    // O formulário é recriado com os filtros salvos no state (por exemplo,
+    // ao voltar da tela de detalhe). takeUntilDestroyed() encerra a inscrição
+    // junto com o componente.
     this._facade.formularioConsulta$
       .pipe(takeUntilDestroyed())
       .subscribe((value: IConsulta) => {
@@ -82,12 +75,6 @@ export class DesaparecidosComponent {
           this.formularioConsulta = value;
           this.criarForm();
         }
-      });
-
-    this._facade.erroConsulta$
-      .pipe(takeUntilDestroyed())
-      .subscribe((value: string | null) => {
-        this.erroConsulta = value;
       });
   }
 

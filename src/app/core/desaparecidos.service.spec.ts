@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -20,7 +20,7 @@ describe('DesaparecidosService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     service = TestBed.inject(DesaparecidosService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -39,8 +39,8 @@ describe('DesaparecidosService', () => {
       expect(req.request.params.get('faixaIdadeInicial')).toBe('0');
       expect(req.request.params.get('faixaIdadeFinal')).toBe('0');
       expect(req.request.params.get('nome')).toBe('');
-      expect(req.request.params.has('sexo')).toBeFalse();
-      expect(req.request.params.has('status')).toBeFalse();
+      expect(req.request.params.has('sexo')).toBe(false);
+      expect(req.request.params.has('status')).toBe(false);
       req.flush({});
     });
 

@@ -22,13 +22,13 @@ function criarFacadeFake() {
     controlePaginacao$: new BehaviorSubject<Paginacao>({ page: 0, size: 12 }),
     formularioConsulta$: new BehaviorSubject<IConsulta>({} as IConsulta),
     erroConsulta$: new BehaviorSubject<string | null>(null),
-    loadInitialData: jasmine.createSpy('loadInitialData'),
-    tentarNovamente: jasmine.createSpy('tentarNovamente'),
-    adicionarFormularioState: jasmine.createSpy('adicionarFormularioState'),
-    resetPagination: jasmine.createSpy('resetPagination'),
-    consultarDesaparecidos: jasmine.createSpy('consultarDesaparecidos'),
-    handlePagination: jasmine.createSpy('handlePagination'),
-    getIdDetalhes: jasmine.createSpy('getIdDetalhes'),
+    loadInitialData: vi.fn(),
+    tentarNovamente: vi.fn(),
+    adicionarFormularioState: vi.fn(),
+    resetPagination: vi.fn(),
+    consultarDesaparecidos: vi.fn(),
+    handlePagination: vi.fn(),
+    getIdDetalhes: vi.fn(),
   };
 }
 
@@ -42,9 +42,7 @@ describe('DesaparecidosComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [DesaparecidosComponent],
-      providers: [
-        { provide: DesaparecidosFacade, useValue: facade },
-      ],
+      providers: [{ provide: DesaparecidosFacade, useValue: facade }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DesaparecidosComponent);
@@ -68,11 +66,11 @@ describe('DesaparecidosComponent', () => {
       facade.formularioConsulta$,
       facade.erroConsulta$,
     ];
-    observables.forEach((obs) => expect(obs.observed).toBeTrue());
+    observables.forEach((obs) => expect(obs.observed).toBe(true));
 
     fixture.destroy();
 
-    observables.forEach((obs) => expect(obs.observed).toBeFalse());
+    observables.forEach((obs) => expect(obs.observed).toBe(false));
   });
 
   describe('quando a API falha', () => {

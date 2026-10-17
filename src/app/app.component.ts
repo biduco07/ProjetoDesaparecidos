@@ -1,16 +1,17 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'ProjetoDesaparecidos';
+  private router = inject(Router);
 
-  constructor(private router: Router) {}
+  title = 'ProjetoDesaparecidos';
 
   enviaInicio() {
     this.router.navigate(['/']);

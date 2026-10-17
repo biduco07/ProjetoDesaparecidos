@@ -1,6 +1,6 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { DesaparecidosService } from '../../core/desaparecidos.service';
 import { DesaparecidosState } from './state/desaparecidos.state';
 import { IEstatisticas } from './models/estatisticas.model';
@@ -16,8 +16,20 @@ import { Router } from '@angular/router';
 export const MENSAGEM_ERRO_CONSULTA =
   'Não foi possível carregar a lista de pessoas. Verifique sua conexão e tente de novo.';
 
+/** Mensagem exibida na tela de detalhe quando os dados da pessoa não carregam. */
+export const MENSAGEM_ERRO_DETALHE =
+  'Não foi possível carregar os dados desta pessoa. Verifique sua conexão e tente de novo.';
+
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
+  private _api = inject(DesaparecidosService);
+  private _state = inject(DesaparecidosState);
+  private _alert = inject(AlertService);
+  private _router = inject(Router);
+  private _platformId = inject(PLATFORM_ID);
+  /** Busca de detalhe em andamento, cancelada se outra pessoa for aberta. */
+  private _detalheEmAndamento?: Subscription;
+
   localizadosDesaparecidos$!: Observable<IEstatisticas>;
   listaPessoas$!: Observable<ResultadoPaginado<IPessoas>>;
   detalhePessoa$!: Observable<IPessoas>;
@@ -25,14 +37,9 @@ export class DesaparecidosFacade {
   formularioConsulta$!: Observable<IConsulta>;
   idDetalhe$!: Observable<number>;
   erroConsulta$!: Observable<string | null>;
+  erroDetalhe$!: Observable<string | null>;
 
-  constructor(
-    private _api: DesaparecidosService,
-    private _state: DesaparecidosState,
-    private _alert: AlertService,
-    private _router: Router,
-    @Inject(PLATFORM_ID) private _platformId: object
-  ) {
+  constructor() {
     // Link Observables
     this.localizadosDesaparecidos$ = this._state.localizadosDesaparecidos$;
     this.listaPessoas$ = this._state.listaPessoas$;
@@ -41,6 +48,7 @@ export class DesaparecidosFacade {
     this.formularioConsulta$ = this._state.formularioConsulta$;
     this.idDetalhe$ = this._state.idDetalhe$;
     this.erroConsulta$ = this._state.erroConsulta$;
+    this.erroDetalhe$ = this._state.erroDetalhe$;
   }
 
   loadInitialData(): void {
@@ -96,16 +104,38 @@ export class DesaparecidosFacade {
       this.consultarEstatisticas();
     }
   }
+
+  /**
+   * Abre a tela de detalhe e busca a pessoa. A tela mostra o carregamento e,
+   * se a API falhar, a mensagem com o botão "Tentar de novo".
+   */
   abrirDetalhes(id: number): void {
-    this._api.getArquivosDetalhe(id).subscribe({
+    this._router.navigate(['/detalhe']);
+    this.carregarDetalhe(id);
+  }
+
+  carregarDetalhe(id: number): void {
+    // Cancela uma busca anterior para que uma resposta atrasada não mostre
+    // outra pessoa, e limpa a pessoa anterior para a tela não exibi-la
+    // enquanto a nova carrega.
+    this._detalheEmAndamento?.unsubscribe();
+    this._state.erroDetalhe = null;
+    this._state.detalhePessoa = {} as IPessoas;
+
+    this._detalheEmAndamento = this._api.getArquivosDetalhe(id).subscribe({
       next: (res) => {
         this._state.detalhePessoa = res;
-        this._router.navigate(['/detalhe']);
       },
       error: (error) => {
         console.error('Erro ao consultar detalhes', error);
+        this._state.erroDetalhe = MENSAGEM_ERRO_DETALHE;
       },
     });
+  }
+
+  /** Repete a busca da pessoa aberta na tela de detalhe. */
+  tentarCarregarDetalheNovamente(): void {
+    this.carregarDetalhe(this._state.idDetalhe);
   }
 
   handlePagination(event: PageEvent): void {

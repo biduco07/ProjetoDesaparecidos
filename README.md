@@ -24,17 +24,18 @@ _Prints da listagem, dos filtros e da tela de detalhe serão adicionados aqui._
 - Listagem em cards com paginação (12 registros por página).
 - Filtros por nome, faixa etária, sexo e status (desaparecido/localizado).
 - Tela de detalhe com situação do caso, local e data do desaparecimento e há quantos dias a pessoa está desaparecida.
+- Se a API falhar, a lista e a tela de detalhe mostram uma mensagem amigável com o botão "Tentar de novo".
 - Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens.
 - Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
 
 ## Stack
 
-- [Angular 19](https://angular.dev/) (standalone components, novo control flow `@if`/`@for`, SSR)
+- [Angular 22](https://angular.dev/) (standalone components, `inject()`, control flow `@if`/`@for`, SSR)
 - [Angular Material](https://material.angular.io/)
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [RxJS](https://rxjs.dev/)
 - [NgxMask](https://github.com/JsDaddy/ngx-mask)
-- Testes com Karma + Jasmine; lint com [angular-eslint](https://github.com/angular-eslint/angular-eslint)
+- Testes com [Vitest](https://vitest.dev/) + jsdom (builder `@angular/build:unit-test`); lint com [angular-eslint](https://github.com/angular-eslint/angular-eslint)
 - [Docker](https://www.docker.com/) + nginx para servir o build
 
 ## Arquitetura: Facade + State
@@ -77,7 +78,7 @@ src/
 
 Pré-requisitos: **Node.js 22 (LTS)** e npm.
 
-> **Atenção à versão do Node:** o Angular 19 suporta Node 18, 20 e 22, mas **não o Node 24**. A versão do projeto está fixada no [`.nvmrc`](.nvmrc) e no campo `engines` do `package.json` (o npm avisa com `EBADENGINE` se a versão for outra). Com nvm/fnm, rode `nvm use` (ou `fnm use`) na raiz do projeto. A CI e o Docker usam a mesma versão.
+> **Atenção à versão do Node:** o Angular 22 exige Node **22.22.3 ou mais novo** na linha 22 (também aceita 24.15+ e 26+). A versão do projeto está fixada no [`.nvmrc`](.nvmrc) e no campo `engines` do `package.json` (o npm avisa com `EBADENGINE` se a versão for outra). Com nvm/fnm, rode `nvm use` (ou `fnm use`) na raiz do projeto. A CI e o Docker usam a mesma versão.
 
 ```sh
 git clone https://github.com/biduco07/ProjetoDesaparecidos.git
@@ -93,15 +94,15 @@ A aplicação fica disponível em `http://localhost:4200/`.
 | Comando               | Descrição                                           |
 | --------------------- | --------------------------------------------------- |
 | `npm start`           | Servidor de desenvolvimento                         |
-| `npm test`            | Testes unitários (Karma + Jasmine) em modo watch    |
-| `npm run test:ci`     | Testes uma única vez em Chrome headless             |
+| `npm test`            | Testes unitários (Vitest) em modo watch             |
+| `npm run test:ci`     | Testes uma única vez (jsdom, sem abrir navegador)   |
 | `npm run lint`        | ESLint com as regras do angular-eslint              |
 | `npm run build`       | Build de produção em `dist/projeto-desaparecidos`   |
 | `npm run build:pages` | Build de produção da demo em `docs/` (GitHub Pages) |
 
 ### Qualidade e CI
 
-O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo push para `main`/`dev` e em pull requests: `npm ci`, lint, testes em Chrome headless e build de produção.
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo push para `main`/`dev` e em pull requests: `npm ci`, lint, testes (Vitest) e build de produção.
 
 Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações) e os componentes principais.
 
@@ -128,4 +129,4 @@ git commit -m "build(pages): regenera docs/"
 
 Depois do merge em `main`, o Pages republica sozinho em alguns minutos.
 
-O script usa a configuração `pages` do `angular.json` (`outputMode: "static"`, arquivos do navegador direto em `docs/`, sem a pasta `server`) e `--base-href /ProjetoDesaparecidos/`, o subcaminho do repositório no Pages. Não é preciso `404.html` nem `.nojekyll`: as duas rotas (`/` e `/detalhe`) são pré-renderizadas como `index.html` e `detalhe/index.html`, e nenhum arquivo gerado começa com `_` (o que o Jekyll do Pages ignoraria).
+O script usa a configuração `pages` do `angular.json` (`outputMode: "static"`, arquivos do navegador direto em `docs/`, sem a pasta `server`) e `--base-href /ProjetoDesaparecidos/`, o subcaminho do repositório no Pages. Não é preciso `404.html` nem `.nojekyll`: as duas rotas (`/` e `/detalhe`) são pré-renderizadas como `index.html` e `detalhe/index.html`, e nenhum arquivo gerado começa com `_` (o que o Jekyll do Pages ignoraria). Como o detalhe depende da pessoa escolhida na lista, `detalhe/index.html` é só um redirecionamento para a lista (quem recarrega a página de detalhe volta para a listagem).

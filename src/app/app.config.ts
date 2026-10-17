@@ -10,6 +10,7 @@ import { routes } from './app.routes';
 import {
   provideClientHydration,
   withEventReplay,
+  withNoIncrementalHydration,
 } from '@angular/platform-browser';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideNgxMask } from 'ngx-mask';
@@ -24,7 +25,7 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'enabled',
       })
     ),
-    provideClientHydration(withEventReplay()),
+    provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
     provideHttpClient(withFetch()), // Habilita Fetch APIm
     provideNgxMask(),
   ],

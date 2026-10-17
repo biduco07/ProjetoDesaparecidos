@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -47,24 +52,27 @@ export interface ImagemSelecionada {
   ],
   standalone: true,
   templateUrl: './desaparecidos-detalhe-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './desaparecidos-detalhe-dialog.component.scss',
 })
 export class DesaparecidosDetalheDialogComponent {
+  private _fb = inject(FormBuilder);
+  private _facade = inject(DesaparecidosFacade);
+  private _alert = inject(AlertService);
+  dialogRef =
+    inject<MatDialogRef<DesaparecidosDetalheDialogComponent>>(MatDialogRef);
+  data = inject<{ id: number; descricao: string }>(MAT_DIALOG_DATA);
+
   form!: FormGroup;
 
   /**
    * Arquivo e pré-visualização ficam no mesmo item para que remover uma
-   * imagem também remova o arquivo que seria enviado.
+   * imagem também remova o arquivo que seria enviado. Como é um signal, a
+   * view (OnPush) é atualizada quando a leitura assíncrona termina.
    */
-  imagens: ImagemSelecionada[] = [];
+  readonly imagens = signal<ImagemSelecionada[]>([]);
 
-  constructor(
-    private _fb: FormBuilder,
-    private _facade: DesaparecidosFacade,
-    private _alert: AlertService,
-    public dialogRef: MatDialogRef<DesaparecidosDetalheDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { id: number; descricao: string } //
-  ) {
+  constructor() {
     this.criarForm();
   }
 
@@ -85,11 +93,14 @@ export class DesaparecidosDetalheDialogComponent {
         // O item entra na lista na ordem da seleção; a pré-visualização é
         // preenchida quando a leitura (assíncrona) do arquivo terminar.
         const imagem: ImagemSelecionada = { arquivo: file, preview: '' };
-        this.imagens.push(imagem);
+        this.imagens.update((lista) => [...lista, imagem]);
 
         const reader = new FileReader();
         reader.onload = () => {
-          imagem.preview = reader.result as string;
+          const preview = reader.result as string;
+          this.imagens.update((lista) =>
+            lista.map((item) => (item === imagem ? { ...item, preview } : item))
+          );
         };
         reader.readAsDataURL(file);
       });
@@ -97,7 +108,7 @@ export class DesaparecidosDetalheDialogComponent {
   }
 
   removeImage(index: number): void {
-    this.imagens.splice(index, 1);
+    this.imagens.update((lista) => lista.filter((_, i) => i !== index));
   }
 
   onSend(): void {
@@ -110,7 +121,7 @@ export class DesaparecidosDetalheDialogComponent {
       formData.append('descricao', this.form.value.descricao);
       formData.append('informacao', this.form.value.informacao);
       formData.append('data', dataConvertida);
-      for (const { arquivo } of this.imagens) {
+      for (const { arquivo } of this.imagens()) {
         formData.append('files', arquivo);
       }
       this.dialogRef.close();
