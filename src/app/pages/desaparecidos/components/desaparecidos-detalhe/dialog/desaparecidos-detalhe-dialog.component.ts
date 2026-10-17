@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -50,6 +50,13 @@ export interface ImagemSelecionada {
   styleUrl: './desaparecidos-detalhe-dialog.component.scss',
 })
 export class DesaparecidosDetalheDialogComponent {
+  private _fb = inject(FormBuilder);
+  private _facade = inject(DesaparecidosFacade);
+  private _alert = inject(AlertService);
+  dialogRef =
+    inject<MatDialogRef<DesaparecidosDetalheDialogComponent>>(MatDialogRef);
+  data = inject<{ id: number; descricao: string }>(MAT_DIALOG_DATA);
+
   form!: FormGroup;
 
   /**
@@ -58,13 +65,7 @@ export class DesaparecidosDetalheDialogComponent {
    */
   imagens: ImagemSelecionada[] = [];
 
-  constructor(
-    private _fb: FormBuilder,
-    private _facade: DesaparecidosFacade,
-    private _alert: AlertService,
-    public dialogRef: MatDialogRef<DesaparecidosDetalheDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { id: number; descricao: string } //
-  ) {
+  constructor() {
     this.criarForm();
   }
 

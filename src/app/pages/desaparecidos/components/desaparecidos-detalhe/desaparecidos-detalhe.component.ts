@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { DesaparecidosFacade } from '../../desaparecidos.facade';
 import { Subject, takeUntil } from 'rxjs';
 import { IPessoas } from '../../models/pessoas.model';
@@ -16,16 +16,16 @@ import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-deta
   styleUrl: './desaparecidos-detalhe.component.scss',
 })
 export class DesaparecidosDetalheComponent implements OnDestroy {
+  private dialog = inject(MatDialog);
+  private _facade = inject(DesaparecidosFacade);
+  private router = inject(Router);
+
   id!: number;
   pessoa!: IPessoas;
   dataPercorrida!: number;
   private _unsubscribeFlag$ = new Subject<void>();
 
-  constructor(
-    private dialog: MatDialog,
-    private _facade: DesaparecidosFacade,
-    private router: Router
-  ) {
+  constructor() {
     this._facade.idDetalhe$
       .pipe(takeUntil(this._unsubscribeFlag$))
       .subscribe((value: number) => {

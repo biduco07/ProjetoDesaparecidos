@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -41,6 +41,9 @@ import { IConsulta } from '../models/consulta.model';
   ],
 })
 export class DesaparecidosComponent {
+  private _facade = inject(DesaparecidosFacade);
+  private _fb = inject(FormBuilder);
+
   form!: FormGroup;
 
   localizadosDesaparecidos!: IEstatisticas;
@@ -49,7 +52,7 @@ export class DesaparecidosComponent {
   formularioConsulta!: IConsulta;
   erroConsulta: string | null = null;
 
-  constructor(private _facade: DesaparecidosFacade, private _fb: FormBuilder) {
+  constructor() {
     this.criarForm();
     this._facade.loadInitialData();
 

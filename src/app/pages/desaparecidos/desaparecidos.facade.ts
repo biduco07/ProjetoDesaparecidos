@@ -1,4 +1,4 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { DesaparecidosService } from '../../core/desaparecidos.service';
@@ -18,6 +18,12 @@ export const MENSAGEM_ERRO_CONSULTA =
 
 @Injectable({ providedIn: 'root' })
 export class DesaparecidosFacade {
+  private _api = inject(DesaparecidosService);
+  private _state = inject(DesaparecidosState);
+  private _alert = inject(AlertService);
+  private _router = inject(Router);
+  private _platformId = inject(PLATFORM_ID);
+
   localizadosDesaparecidos$!: Observable<IEstatisticas>;
   listaPessoas$!: Observable<ResultadoPaginado<IPessoas>>;
   detalhePessoa$!: Observable<IPessoas>;
@@ -26,13 +32,7 @@ export class DesaparecidosFacade {
   idDetalhe$!: Observable<number>;
   erroConsulta$!: Observable<string | null>;
 
-  constructor(
-    private _api: DesaparecidosService,
-    private _state: DesaparecidosState,
-    private _alert: AlertService,
-    private _router: Router,
-    @Inject(PLATFORM_ID) private _platformId: object
-  ) {
+  constructor() {
     // Link Observables
     this.localizadosDesaparecidos$ = this._state.localizadosDesaparecidos$;
     this.listaPessoas$ = this._state.listaPessoas$;
