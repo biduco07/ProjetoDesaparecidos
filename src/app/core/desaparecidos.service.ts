@@ -1,40 +1,62 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { Paginacao } from '../shared/paginacao/paginacao';
+import { ResultadoPaginado } from '../shared/paginacao/resultado-paginado';
+import { IConsulta } from '../pages/desaparecidos/models/consulta.model';
+import { IPessoas } from '../pages/desaparecidos/models/pessoas.model';
+import { IEstatisticas } from '../pages/desaparecidos/models/estatisticas.model';
+
+const REGISTROS_POR_PAGINA = 12;
 
 @Injectable({
   providedIn: 'root',
 })
 export class DesaparecidosService {
-  endpointAbitus: string = ' https://abitus-api.geia.vip/';
+  private readonly apiUrl = environment.apiUrl;
+
   constructor(private http: HttpClient) {}
 
-  getArquivos(paginacao?: Paginacao, form?: any): Observable<any> {
-    return this.http.get<any>(
-      `${this.endpointAbitus}v1/pessoas/aberto/filtro?faixaIdadeFinal=${
-        form?.faixaIdadeFinal || 0
-      }&faixaIdadeInicial=${form?.faixaIdadeInicial || 0}&nome=${
-        form?.nome || ''
-      }&porPagina=12&sexo=${form?.sexo}&status=${form?.status}&pagina=${
-        paginacao?.page || '0'
-      }`
+  getArquivos(
+    paginacao?: Paginacao,
+    filtros?: Partial<IConsulta> | null
+  ): Observable<ResultadoPaginado<IPessoas>> {
+    let params = new HttpParams()
+      .set('faixaIdadeFinal', filtros?.faixaIdadeFinal || 0)
+      .set('faixaIdadeInicial', filtros?.faixaIdadeInicial || 0)
+      .set('nome', filtros?.nome || '')
+      .set('porPagina', paginacao?.size || REGISTROS_POR_PAGINA)
+      .set('pagina', paginacao?.page || 0);
+
+    // Filtros opcionais só são enviados quando preenchidos, evitando
+    // valores como "undefined" ou "null" na query string.
+    if (filtros?.sexo) {
+      params = params.set('sexo', filtros.sexo);
+    }
+    if (filtros?.status) {
+      params = params.set('status', filtros.status);
+    }
+
+    return this.http.get<ResultadoPaginado<IPessoas>>(
+      `${this.apiUrl}/v1/pessoas/aberto/filtro`,
+      { params }
     );
   }
 
-  getArquivosDetalhe(id: number): Observable<any> {
-    return this.http.get<any>(`${this.endpointAbitus}v1/pessoas/${id}`);
+  getArquivosDetalhe(id: number): Observable<IPessoas> {
+    return this.http.get<IPessoas>(`${this.apiUrl}/v1/pessoas/${id}`);
   }
 
-  getEstatisticas(): Observable<any> {
-    return this.http.get<any>(
-      this.endpointAbitus + 'v1/pessoas/aberto/estatistico'
+  getEstatisticas(): Observable<IEstatisticas> {
+    return this.http.get<IEstatisticas>(
+      `${this.apiUrl}/v1/pessoas/aberto/estatistico`
     );
   }
 
-  postOcorrencia(form: FormData): Observable<any> {
-    return this.http.post<any>(
-      this.endpointAbitus + 'v1/ocorrencias/informacoes-desaparecido',
+  postOcorrencia(form: FormData): Observable<unknown> {
+    return this.http.post<unknown>(
+      `${this.apiUrl}/v1/ocorrencias/informacoes-desaparecido`,
       form
     );
   }

@@ -3,7 +3,7 @@ export interface IPessoas {
   idade: number;
   nome: string;
   sexo: string;
-  urlFoto: any;
+  urlFoto: string | null;
   vivo: boolean;
   ultimaOcorrencia: IUltimaOcorrencia;
 }
@@ -11,13 +11,13 @@ export interface IUltimaOcorrencia {
   dataLocalizacao: Date;
   dtDesaparecimento: Date;
   encontradoVivo: boolean;
-  listaCartaz: any;
+  listaCartaz: unknown;
   localDesaparecimentoConcat: string;
   ocoId: number;
   ocorrenciaEntrevDesapDTO: IocorrenciaEntrevDesapDTO;
 }
 
 export interface IocorrenciaEntrevDesapDTO {
-  informacao: Date;
-  vestimentasDesaparecido: Date;
+  informacao: string;
+  vestimentasDesaparecido: string;
 }
