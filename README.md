@@ -75,7 +75,9 @@ src/
 
 ## Como rodar
 
-Pré-requisitos: Node.js 22 (LTS) e npm.
+Pré-requisitos: **Node.js 22 (LTS)** e npm.
+
+> **Atenção à versão do Node:** o Angular 19 suporta Node 18, 20 e 22, mas **não o Node 24**. A versão do projeto está fixada no [`.nvmrc`](.nvmrc) e no campo `engines` do `package.json` (o npm avisa com `EBADENGINE` se a versão for outra). Com nvm/fnm, rode `nvm use` (ou `fnm use`) na raiz do projeto. A CI e o Docker usam a mesma versão.
 
 ```sh
 git clone https://github.com/biduco07/ProjetoDesaparecidos.git

@@ -12,6 +12,9 @@
     "serve:ssr:ProjetoDesaparecidos": "node dist/projeto-desaparecidos/server/server.mjs"
   },
   "private": true,
+  "engines": {
+    "node": "^22.0.0"
+  },
   "dependencies": {
     "@angular/cdk": "^19.2.6",
     "@angular/common": "^19.2.0",
