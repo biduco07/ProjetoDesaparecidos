@@ -31,7 +31,8 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 - Filtros por nome, faixa etária, sexo e status (desaparecido/localizado).
 - Tela de detalhe com situação do caso, local e data do desaparecimento e há quantos dias a pessoa está desaparecida.
 - Se a API falhar, a lista e a tela de detalhe mostram uma mensagem amigável com o botão "Tentar de novo".
-- Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens.
+- Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens. A data é validada de verdade (recusa 31/02 e datas futuras) e as imagens precisam ser PNG/JPG de até 3 MB.
+- Acessível (WCAG 2.1 AA): tudo funciona pelo teclado, link "Pular para o conteúdo", foco levado ao conteúdo quando a rota muda, título da aba por página, resultado da busca anunciado para leitores de tela e contraste de 4,5:1. O axe-core não aponta violações e o Lighthouse dá 100 em acessibilidade.
 - Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
 
 ## Requisitos do teste e onde estão atendidos
@@ -45,7 +46,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | Detalhe com destaque da situação                   | Faixa e borda vermelhas (desaparecido) ou verdes (localizado), dados da ocorrência e dias desde o desaparecimento                                  |
 | Envio de informações sobre a pessoa                | Diálogo com informação, data com máscara (`ngx-mask`) e várias imagens com pré-visualização, enviado como `multipart/form-data`                    |
 | Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
-| Layout responsivo                                 | Tailwind: filtros acima da lista e 2 colunas de cards no celular; filtros na lateral e 3 colunas no desktop                                        |
+| Layout responsivo                                 | Tailwind: no celular, filtros acima da lista e 1 coluna de cards (2 a partir de 640 px); no desktop, filtros na lateral e 3 colunas                                    |
 | Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; alerta (snackbar) no envio de informações                                            |
 | Testes unitários                                  | 90 testes em 9 arquivos (Vitest), cobertura de linhas de ~99%, rodando na CI a cada push e PR                                                                                   |
 | Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
@@ -86,6 +87,8 @@ Isso mantém os componentes simples, concentra regras de negócio em um único p
 - **Filtros opcionais fora da query string quando vazios:** `sexo` e `status` só são enviados quando escolhidos, para não mandar `undefined`/`null` como texto para a API.
 - **Erro com nova tentativa no lugar da tela:** se a lista ou o detalhe falham, a área de conteúdo mostra a mensagem e o botão "Tentar de novo", que repete a mesma consulta (mesma página e filtros).
 - **Vitest + jsdom em vez de Karma:** os testes rodam sem abrir navegador, mais rápido na máquina e na CI, com o builder oficial `@angular/build:unit-test`.
+- **Cards com um botão de verdade dentro:** o card inteiro continua clicável, mas o nome da pessoa é um `<button>`, para o card abrir pelo teclado e ser anunciado corretamente por leitores de tela.
+- **nginx com cabeçalhos de segurança e cache por tipo de arquivo:** CSP, `X-Frame-Options` e `nosniff`; JS/CSS com hash ficam em cache por 1 ano e o HTML nunca fica em cache, então um deploy novo chega na hora.
 - **Demo estática no GitHub Pages:** a configuração `pages` gera só os arquivos do navegador em `docs/`, sem precisar de servidor Node.
 
 ## Estrutura de pastas
@@ -179,7 +182,14 @@ npm start   # em outro terminal
 node scripts/capturas-de-tela.mjs http://localhost:4200/ screenshots
 ```
 
-Os PNGs versionados foram reduzidos para paleta de 256 cores (cerca de metade do tamanho) depois de gerados.
+Para usar o Edge ou o Chrome já instalados em vez de baixar o Chromium, defina `PW_CHANNEL=msedge` (ou `chrome`) antes do último comando.
+
+Os PNGs versionados foram reduzidos para paleta de 256 cores (menos da metade do tamanho) depois de gerados:
+
+```sh
+npm i --no-save sharp
+node -e "const s=require('sharp'),fs=require('fs');for(const f of fs.readdirSync('screenshots')){const p='screenshots/'+f;s(p).png({palette:true,colors:256,compressionLevel:9}).toBuffer().then(b=>fs.writeFileSync(p,b))}"
+```
 
 ### Qualidade e CI
 
