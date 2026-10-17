@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -10,6 +11,7 @@ import { map } from 'rxjs';
 import { IPessoas } from '../../models/pessoas.model';
 import { DatePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -39,6 +41,7 @@ export class DesaparecidosDetalheComponent {
   private dialog = inject(MatDialog);
   private _facade = inject(DesaparecidosFacade);
   private router = inject(Router);
+  private title = inject(Title);
 
   id!: number;
 
@@ -63,6 +66,15 @@ export class DesaparecidosDetalheComponent {
   });
 
   constructor() {
+    // O título da aba identifica a pessoa (WCAG 2.4.2); o da rota fica até
+    // os dados chegarem.
+    effect(() => {
+      const nome = this.pessoa()?.nome;
+      if (nome) {
+        this.title.setTitle(`${nome} | Projeto Desaparecidos`);
+      }
+    });
+
     this._facade.idDetalhe$
       .pipe(takeUntilDestroyed())
       .subscribe((value: number) => {
@@ -72,6 +84,10 @@ export class DesaparecidosDetalheComponent {
           this.router.navigate(['/']);
         }
       });
+  }
+
+  voltar(): void {
+    this.router.navigate(['/']);
   }
 
   tentarNovamente(): void {
