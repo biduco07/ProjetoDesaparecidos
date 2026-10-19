@@ -1,0 +1,62 @@
+<div class="flex flex-col items-center gap-2 py-4 sm:flex-row sm:justify-between">
+  <p class="text-sm text-muted-foreground">{{ intervalo() }}</p>
+
+  <nav aria-label="Paginação">
+    <ul class="flex flex-row flex-wrap items-center justify-center gap-1">
+      <li>
+        <button
+          hlmBtn
+          variant="ghost"
+          type="button"
+          aria-label="Página anterior"
+          [disabled]="naPrimeira()"
+          (click)="ir(pagina() - 1)"
+        >
+          <ng-icon name="lucideChevronLeft" aria-hidden="true" />
+          <span class="hidden sm:inline">Anterior</span>
+        </button>
+      </li>
+
+      <!-- Números rastreados pelo valor: o botão clicado continua o mesmo
+           (e com o foco) quando a janela de páginas anda. -->
+      @for (item of janela(); track item === 'reticencias' ? 'reticencias-' + $index : item) {
+      <li>
+        @if (item === 'reticencias') {
+        <span class="flex size-9 items-center justify-center text-muted-foreground">
+          <ng-icon name="lucideEllipsis" aria-hidden="true" />
+          <span class="sr-only">Mais páginas</span>
+        </span>
+        } @else {
+        <button
+          hlmBtn
+          [variant]="item === pagina() ? 'outline' : 'ghost'"
+          size="icon"
+          type="button"
+          [attr.aria-label]="'Página ' + (item + 1)"
+          [attr.aria-current]="item === pagina() ? 'page' : null"
+          (click)="ir(item)"
+        >
+          {{ item + 1 }}
+        </button>
+        }
+      </li>
+      }
+
+      <li>
+        <button
+          hlmBtn
+          variant="ghost"
+          type="button"
+          aria-label="Próxima página"
+          [disabled]="naUltima()"
+          (click)="ir(pagina() + 1)"
+        >
+          <span class="hidden sm:inline">Próxima</span>
+          <ng-icon name="lucideChevronRight" aria-hidden="true" />
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <p class="sr-only" aria-live="polite" aria-atomic="true">{{ anuncio() }}</p>
+</div>
