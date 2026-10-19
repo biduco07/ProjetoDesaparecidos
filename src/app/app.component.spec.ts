@@ -3,6 +3,7 @@ import { Router, provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
 import { TemaService } from './core/tema.service';
 import { classesDeCorFixa } from '../testing/cores-fixas';
+import { buttonVariants } from '@spartan-ng/helm/button';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -84,6 +85,20 @@ describe('AppComponent', () => {
 
       expect(botaoDeTema(fixture.nativeElement)?.getAttribute('aria-label')).toBe(
         'Usar tema claro'
+      );
+    });
+
+    it('o botão de tema tem as mesmas classes do hlmBtn ghost/icon', () => {
+      // O cabeçalho copia as classes (sem a diretiva, para o bundle inicial);
+      // se a spartan mudar o estilo, este teste avisa.
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const botao = botaoDeTema(fixture.nativeElement);
+      const classes = (texto: string) => new Set(texto.split(/\s+/).filter(Boolean));
+
+      expect(botao).not.toBeNull();
+      expect(classes(botao!.className)).toEqual(
+        classes(buttonVariants({ variant: 'ghost', size: 'icon' }))
       );
     });
 
