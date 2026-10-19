@@ -55,7 +55,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
 | Layout responsivo                                 | Tailwind: no celular, filtros acima da lista e 1 coluna de cards (2 a partir de 640 px); no desktop, filtros na lateral e 3 colunas                                    |
 | Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; aviso (toast do sonner) no envio de informações                                            |
-| Testes unitários                                  | 124 testes em 11 arquivos (Vitest), cobertura de linhas de ~95% (contando os componentes da spartan em `libs/ui/`), rodando na CI a cada push e PR                                                                                   |
+| Testes unitários                                  | 130 testes em 11 arquivos (Vitest), cobertura de linhas de ~95% (contando os componentes da spartan em `libs/ui/`), rodando na CI a cada push e PR                                                                                   |
 | Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
 | README com instruções                             | Este arquivo: [como rodar](#como-rodar), [como testar](#como-testar) e [decisões técnicas](#decisões-técnicas)                                     |
 
@@ -182,11 +182,11 @@ O servidor Express do Angular SSR sobe em `http://localhost:4000/` (porta config
 
 ```sh
 npm run lint      # ESLint (angular-eslint)
-npm run test:ci   # 124 testes unitários com Vitest + jsdom
+npm run test:ci   # 130 testes unitários com Vitest + jsdom
 npm run build     # build de produção com SSR e pré-renderização
 ```
 
-São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~435 kB (cerca de 115 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json`.
+São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~435 kB (cerca de 115 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json` (o build falha acima de 550 kB, para um import que traga o overlay do CDK de volta não passar em silêncio).
 
 ### Roteiro manual
 
