@@ -1,8 +1,8 @@
 /*
  * Ordem do docs/como-usar.md do nuvy-ui (tema NuvyTech para spartan/ui).
  * source(none) + @source: o Tailwind só procura classes no app (src/) e nos
- * componentes da spartan (libs/ui/). A pasta docs/ (build do GitHub Pages,
- * versionada) fica de fora.
+ * componentes da spartan (libs/ui/), sem os testes. A pasta docs/ (build do
+ * GitHub Pages, versionada) fica de fora.
  */
 @layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
@@ -13,6 +13,10 @@
 @import './styles/nuvy-tema.css';
 
 @source "./";
+/* Testes fora da varredura: uma cor fixa citada num comentário de spec ou do
+   src/testing/ iria parar no CSS de produção. */
+@source not "./testing";
+@source not "./**/*.spec.ts";
 @source "../libs/ui";
 
 /* Estilos globais da aplicação (cores, fonte e foco vêm do nuvy-tema.css) */
