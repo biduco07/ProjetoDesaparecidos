@@ -1,37 +1,43 @@
 import { TestBed } from '@angular/core/testing';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { AlertService } from './alert.service';
+import { AlertService, NOTIFICADOR } from './alert.service';
 
 describe('AlertService', () => {
   let service: AlertService;
-  let snackBar: { open: ReturnType<typeof vi.fn> };
+  let notificador: {
+    success: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
-    snackBar = { open: vi.fn() };
+    notificador = { success: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
-      providers: [{ provide: MatSnackBar, useValue: snackBar }],
+      providers: [{ provide: NOTIFICADOR, useValue: notificador }],
     });
     service = TestBed.inject(AlertService);
   });
 
-  it('mostra a mensagem de sucesso com o estilo de sucesso', () => {
+  it('mostra o sucesso pelo toast.success, com o botão "Fechar"', () => {
     service.showSuccess('Enviado');
 
-    expect(snackBar.open).toHaveBeenCalledWith(
+    expect(notificador.success).toHaveBeenCalledWith(
       'Enviado',
-      'Fechar',
-      expect.objectContaining({ panelClass: ['success-snackbar'] })
+      expect.objectContaining({
+        action: expect.objectContaining({ label: 'Fechar' }),
+      })
     );
+    expect(notificador.error).not.toHaveBeenCalled();
   });
 
-  it('mostra a mensagem de erro com o estilo de erro', () => {
+  it('mostra o erro pelo toast.error, com o botão "Fechar"', () => {
     service.showError('Falhou');
 
-    expect(snackBar.open).toHaveBeenCalledWith(
+    expect(notificador.error).toHaveBeenCalledWith(
       'Falhou',
-      'Fechar',
-      expect.objectContaining({ panelClass: ['error-snackbar'] })
+      expect.objectContaining({
+        action: expect.objectContaining({ label: 'Fechar' }),
+      })
     );
+    expect(notificador.success).not.toHaveBeenCalled();
   });
 });
