@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { DeferBlockState, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
 import { TemaService } from './core/tema.service';
@@ -100,13 +100,16 @@ describe('AppComponent', () => {
     });
   });
 
-  it('tem o toaster dos avisos', () => {
+  it('carrega o toaster dos avisos num @defer (fora do bundle inicial)', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const blocos = await fixture.getDeferBlocks();
+    expect(blocos.length).toBe(1);
 
-    expect(
-      (fixture.nativeElement as HTMLElement).querySelector('hlm-toaster')
-    ).not.toBeNull();
+    await blocos[0].render(DeferBlockState.Complete);
+
+    expect(el.querySelector('hlm-toaster')).not.toBeNull();
   });
 
   it('não usa cores fixas do Tailwind (só tokens do tema)', () => {

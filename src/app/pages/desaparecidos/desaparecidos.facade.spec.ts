@@ -2,7 +2,7 @@ import type { Mocked } from 'vitest';
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { PageEvent } from '@angular/material/paginator';
+import { MudancaDePagina } from '../../shared/paginacao/paginacao';
 import { Subject, of, throwError } from 'rxjs';
 
 import {
@@ -175,7 +175,7 @@ describe('DesaparecidosFacade', () => {
 
   describe('paginação', () => {
     it('atualiza a página no state mantendo o tamanho e reconsulta', () => {
-      facade.handlePagination({ pageIndex: 2, pageSize: 12 } as PageEvent);
+      facade.handlePagination({ pagina: 2, tamanho: 12 } satisfies MudancaDePagina);
 
       expect(state.controlePaginacao).toEqual({ page: 2, size: 12 });
       expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
@@ -220,7 +220,7 @@ describe('DesaparecidosFacade', () => {
       const filtros = { nome: 'JOSÉ' } as IConsulta;
       facade.adicionarFormularioState(filtros);
 
-      facade.handlePagination({ pageIndex: 1, pageSize: 12 } as PageEvent);
+      facade.handlePagination({ pagina: 1, tamanho: 12 } satisfies MudancaDePagina);
 
       expect(api.getArquivos).toHaveBeenCalledExactlyOnceWith(
         { page: 1, size: 12 },

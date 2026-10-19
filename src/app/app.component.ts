@@ -10,14 +10,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideMoon, lucideSun } from '@ng-icons/lucide';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmToasterImports } from '@spartan-ng/helm/sonner';
+import { HlmToaster } from '@spartan-ng/helm/sonner';
 import { filter, skip } from 'rxjs';
 import { TemaService } from './core/tema.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HlmButtonImports, HlmToasterImports, NgIcon],
+  // HlmToaster direto (e não o array HlmToasterImports): o @defer só tira do
+  // bundle inicial componentes importados pela própria classe.
+  imports: [RouterOutlet, HlmToaster, NgIcon],
   providers: [provideIcons({ lucideSun, lucideMoon })],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
