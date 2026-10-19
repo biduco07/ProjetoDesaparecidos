@@ -256,6 +256,45 @@ describe('DesaparecidosDetalheDialogComponent', () => {
     expect(data.required).toBe(true);
   });
 
+  describe('botões do rodapé', () => {
+    function botaoDoRodape(texto: string): HTMLButtonElement {
+      const botao = Array.from(
+        elemento().querySelectorAll<HTMLButtonElement>('[data-slot="dialog-footer"] button')
+      ).find((b) => b.textContent?.trim() === texto);
+      expect(botao, `botão "${texto}"`).toBeDefined();
+      return botao!;
+    }
+
+    it('"Enviar" fica fora do <form> mas envia o formulário (form="form-informacao")', () => {
+      const enviar = botaoDoRodape('Enviar');
+      expect(enviar.closest('form')).toBeNull();
+      expect(enviar.form?.id).toBe('form-informacao');
+      preencherFormulario();
+
+      enviar.click();
+
+      expect(facade.postOcorrencia).toHaveBeenCalledTimes(1);
+      expect(dialogRef.close).toHaveBeenCalled();
+    });
+
+    it('"Enviar" com o formulário vazio mostra os erros e não envia', () => {
+      botaoDoRodape('Enviar').click();
+      fixture.detectChanges();
+
+      expect(facade.postOcorrencia).not.toHaveBeenCalled();
+      expect(errosVisiveis().length).toBe(2);
+    });
+
+    it('"Fechar" fecha sem enviar', () => {
+      preencherFormulario();
+
+      botaoDoRodape('Fechar').click();
+
+      expect(dialogRef.close).toHaveBeenCalled();
+      expect(facade.postOcorrencia).not.toHaveBeenCalled();
+    });
+  });
+
   it('fecha sem enviar pelo botão "Fechar"', () => {
     component.onClose();
 
