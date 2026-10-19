@@ -12,7 +12,10 @@ import { IPessoas } from '../../models/pessoas.model';
 import { DatePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { Dialog } from '@angular/cdk/dialog';
+import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { BrnDialogService } from '@spartan-ng/brain/dialog';
 import {
   lucideArrowLeft,
   lucideCircleAlert,
@@ -40,6 +43,16 @@ const UM_DIA_EM_MS = 1000 * 60 * 60 * 24;
     HlmSpinnerImports,
   ],
   providers: [
+    // O CDK 21+ abre overlays como popover, na "top layer" do navegador, acima
+    // de qualquer z-index: o toast de arquivo recusado ficava atrás do fundo do
+    // diálogo. A spartan resolve com provideSpartanHlm() na raiz, mas isso
+    // traria o overlay do CDK (~46 kB) para o bundle inicial. Aqui esta tela
+    // tem as próprias instâncias do serviço de diálogo, que leem a
+    // configuração abaixo (usePopover: false), e tudo fica no chunk da rota.
+    { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },
+    Dialog,
+    BrnDialogService,
+    HlmDialogService,
     provideIcons({
       lucideArrowLeft,
       lucideCircleAlert,
@@ -117,6 +130,9 @@ export class DesaparecidosDetalheComponent {
       // Com várias imagens o formulário passa da altura do celular: rola por dentro.
       contentClass: 'sm:max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto',
       closeLabel: 'Fechar',
+      // Fecha só pelo X, pelo "Fechar" e pelo Esc: um clique fora (no fundo ou
+      // no "Fechar" de um aviso, que fica por cima) perderia o que foi digitado.
+      closeOnOutsidePointerEvents: false,
     });
   }
 }

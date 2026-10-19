@@ -7,6 +7,7 @@ import {
 import { Router, provideRouter } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 
 import { DesaparecidosDetalheComponent } from './desaparecidos-detalhe.component';
 import { DesaparecidosState } from '../../state/desaparecidos.state';
@@ -163,7 +164,7 @@ describe('DesaparecidosDetalheComponent', () => {
     state.idDetalhe = 7;
     state.detalhePessoa = PESSOA;
     criarComponente();
-    const dialog = TestBed.inject(HlmDialogService);
+    const dialog = fixture.debugElement.injector.get(HlmDialogService);
     const open = vi.spyOn(dialog, 'open').mockReturnValue(undefined as never);
 
     Array.from(elemento().querySelectorAll('button'))
@@ -178,12 +179,25 @@ describe('DesaparecidosDetalheComponent', () => {
     );
   });
 
+  it('abre o diálogo fora da "top layer" do navegador, para o aviso (toast) ficar por cima', () => {
+    // O CDK 21+ abre overlays como popover (top layer), acima de qualquer
+    // z-index: o toast de arquivo recusado ficava atrás do fundo do diálogo.
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+    criarComponente();
+    const injetor = fixture.debugElement.injector;
+
+    expect(injetor.get(OVERLAY_DEFAULT_CONFIG, null)).toEqual({ usePopover: false });
+    // O serviço que esta tela usa é o que enxerga essa configuração (e não o da raiz).
+    expect(injetor.get(HlmDialogService)).not.toBe(TestBed.inject(HlmDialogService));
+  });
+
   it('o diálogo rola por dentro quando passa da altura da tela (celular)', () => {
     state.idDetalhe = 7;
     state.detalhePessoa = PESSOA;
     criarComponente();
     const open = vi
-      .spyOn(TestBed.inject(HlmDialogService), 'open')
+      .spyOn(fixture.debugElement.injector.get(HlmDialogService), 'open')
       .mockReturnValue(undefined as never);
 
     component.openDialog();
@@ -192,6 +206,21 @@ describe('DesaparecidosDetalheComponent', () => {
     expect(opcoes?.contentClass).toContain('overflow-y-auto');
     expect(opcoes?.contentClass).toContain('max-h-[calc(100dvh-2rem)]');
     expect(opcoes?.closeLabel).toBe('Fechar');
+  });
+
+  it('o diálogo não fecha com clique fora dele (no fundo ou no "Fechar" de um aviso)', () => {
+    // Com o aviso por cima do diálogo, o clique no "Fechar" do toast conta como
+    // clique fora e fecharia o formulário, perdendo o que foi digitado.
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+    criarComponente();
+    const open = vi
+      .spyOn(fixture.debugElement.injector.get(HlmDialogService), 'open')
+      .mockReturnValue(undefined as never);
+
+    component.openDialog();
+
+    expect(open.mock.lastCall?.[1]?.closeOnOutsidePointerEvents).toBe(false);
   });
 
   it('não usa cores fixas do Tailwind (desaparecido e localizado)', () => {
