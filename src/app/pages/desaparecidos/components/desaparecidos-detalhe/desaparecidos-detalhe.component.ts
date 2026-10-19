@@ -114,7 +114,8 @@ export class DesaparecidosDetalheComponent {
         id: pessoa?.ultimaOcorrencia?.ocoId,
         descricao: pessoa?.nome,
       },
-      contentClass: 'sm:max-w-xl',
+      // Com várias imagens o formulário passa da altura do celular: rola por dentro.
+      contentClass: 'sm:max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto',
       closeLabel: 'Fechar',
     });
   }

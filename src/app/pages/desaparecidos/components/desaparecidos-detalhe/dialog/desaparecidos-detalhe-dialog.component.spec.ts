@@ -1,6 +1,7 @@
 import type { Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DIALOG_DATA } from '@angular/cdk/dialog';
+import { BrnDialogRef } from '@spartan-ng/brain/dialog';
 import { provideNgxMask } from 'ngx-mask';
 
 import { FormControl } from '@angular/forms';
@@ -11,6 +12,7 @@ import {
 } from './desaparecidos-detalhe-dialog.component';
 import { DesaparecidosFacade } from '../../../desaparecidos.facade';
 import { AlertService } from '../../../../../core/alert.service';
+import { classesDeCorFixa } from '../../../../../../testing/cores-fixas';
 
 function criarArquivo(nome: string, type = 'image/png'): File {
   return new File(['conteudo'], nome, { type });
@@ -26,12 +28,12 @@ describe('DesaparecidosDetalheDialogComponent', () => {
   let fixture: ComponentFixture<DesaparecidosDetalheDialogComponent>;
   let facade: Mocked<Pick<DesaparecidosFacade, 'postOcorrencia'>>;
   let alert: { showError: ReturnType<typeof vi.fn> };
-  let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let dialogRef: { close: ReturnType<typeof vi.fn>; dialogId: number };
 
   beforeEach(async () => {
     facade = { postOcorrencia: vi.fn() };
     alert = { showError: vi.fn() };
-    dialogRef = { close: vi.fn() };
+    dialogRef = { close: vi.fn(), dialogId: 1 };
 
     await TestBed.configureTestingModule({
       imports: [DesaparecidosDetalheDialogComponent],
@@ -39,8 +41,8 @@ describe('DesaparecidosDetalheDialogComponent', () => {
         provideNgxMask(),
         { provide: DesaparecidosFacade, useValue: facade },
         { provide: AlertService, useValue: alert },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { id: 99, descricao: 'FULANO' } },
+        { provide: BrnDialogRef, useValue: dialogRef },
+        { provide: DIALOG_DATA, useValue: { id: 99, descricao: 'FULANO' } },
       ],
     }).compileComponents();
 
@@ -54,6 +56,17 @@ describe('DesaparecidosDetalheDialogComponent', () => {
       informacao: 'Visto no centro',
       data: '10012024',
     });
+  }
+
+  function elemento(): HTMLElement {
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  /** Mensagens de erro visíveis (a spartan esconde as que não valem agora). */
+  function errosVisiveis(): HTMLElement[] {
+    return Array.from(
+      elemento().querySelectorAll<HTMLElement>('[data-slot="field-error"]')
+    ).filter((e) => !e.hidden && e.textContent?.trim());
   }
 
   function arquivosEnviados(): File[] {
@@ -138,17 +151,59 @@ describe('DesaparecidosDetalheDialogComponent', () => {
     component.onSend();
     fixture.detectChanges();
 
-    const elemento = fixture.nativeElement as HTMLElement;
     expect(facade.postOcorrencia).not.toHaveBeenCalled();
     expect(dialogRef.close).not.toHaveBeenCalled();
-    const erros = Array.from(elemento.querySelectorAll('mat-error')).map((e) =>
-      e.textContent?.trim()
-    );
-    expect(erros).toEqual([
+    expect(errosVisiveis().map((e) => e.textContent?.trim())).toEqual([
       'Descreva o que você sabe sobre a pessoa.',
       'Informe a data.',
     ]);
-    expect(document.activeElement).toBe(elemento.querySelector('textarea'));
+    expect(document.activeElement).toBe(elemento().querySelector('textarea'));
+  });
+
+  it('não mostra erro antes de a pessoa tocar no campo ou tentar enviar', () => {
+    expect(errosVisiveis()).toEqual([]);
+    expect(elemento().querySelector('textarea')?.hasAttribute('aria-invalid')).toBe(false);
+  });
+
+  it('liga a mensagem de erro ao campo (aria-invalid e aria-describedby)', () => {
+    component.onSend();
+    fixture.detectChanges();
+
+    const textarea = elemento().querySelector('textarea')!;
+    const erro = errosVisiveis().find((e) =>
+      e.textContent?.includes('Descreva o que você sabe sobre a pessoa.')
+    );
+    expect(textarea.getAttribute('aria-invalid')).toBe('true');
+    expect(erro?.id).toBeTruthy();
+    expect(textarea.getAttribute('aria-describedby')?.split(' ')).toContain(erro?.id);
+  });
+
+  it('descreve o campo de data com o formato esperado', () => {
+    const data = elemento().querySelector<HTMLInputElement>('input[formcontrolname="data"]')!;
+    const formato = Array.from(
+      elemento().querySelectorAll<HTMLElement>('[data-slot="field-description"]')
+    ).find((e) => e.textContent?.includes('Formato dd/mm/aaaa'));
+
+    expect(formato?.id).toBeTruthy();
+    expect(data.getAttribute('aria-describedby')?.split(' ')).toContain(formato?.id);
+  });
+
+  it('a data inválida mostra uma mensagem só', () => {
+    component.form.patchValue({ informacao: 'Visto', data: '31022024' });
+    component.onSend();
+    fixture.detectChanges();
+
+    expect(errosVisiveis().map((e) => e.textContent?.trim())).toEqual([
+      'Data inválida. Use dd/mm/aaaa.',
+    ]);
+  });
+
+  it('não usa cores fixas do Tailwind', () => {
+    component.onFilesSelected(eventoDeSelecao([criarArquivo('foto1.png')]));
+    component.onSend();
+    fixture.detectChanges();
+
+    expect(classesDeCorFixa(elemento())).toEqual([]);
   });
 
   it('não aceita informação só com espaços', () => {
@@ -179,7 +234,7 @@ describe('DesaparecidosDetalheDialogComponent', () => {
     fixture.detectChanges();
 
     const botao = (fixture.nativeElement as HTMLElement).querySelector(
-      '.delete-btn'
+      'button[aria-label^="Remover imagem"]'
     );
     expect(botao?.getAttribute('aria-label')).toBe(
       'Remover imagem 1: foto1.png'
@@ -187,12 +242,18 @@ describe('DesaparecidosDetalheDialogComponent', () => {
     expect(botao?.getAttribute('type')).toBe('button');
   });
 
-  it('rotula a data como o dia em que a pessoa foi vista', () => {
-    const rotulos = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('mat-label'),
-      (e) => e.textContent?.trim()
+  it('rotula a data como o dia em que a pessoa foi vista (campo obrigatório)', () => {
+    const data = elemento().querySelector<HTMLInputElement>(
+      'input[formcontrolname="data"]'
+    )!;
+    const rotulo = elemento().querySelector(`label[for="${data.id}"]`);
+
+    // O asterisco de obrigatório é só visual (aria-hidden); o leitor de tela
+    // anuncia o "obrigatório" pelo atributo required.
+    expect(rotulo?.textContent?.replace('*', '').trim()).toBe(
+      'Data em que a pessoa foi vista'
     );
-    expect(rotulos).toContain('Data em que a pessoa foi vista');
+    expect(data.required).toBe(true);
   });
 
   it('fecha sem enviar pelo botão "Fechar"', () => {

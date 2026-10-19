@@ -178,6 +178,22 @@ describe('DesaparecidosDetalheComponent', () => {
     );
   });
 
+  it('o diálogo rola por dentro quando passa da altura da tela (celular)', () => {
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+    criarComponente();
+    const open = vi
+      .spyOn(TestBed.inject(HlmDialogService), 'open')
+      .mockReturnValue(undefined as never);
+
+    component.openDialog();
+
+    const opcoes = open.mock.lastCall?.[1];
+    expect(opcoes?.contentClass).toContain('overflow-y-auto');
+    expect(opcoes?.contentClass).toContain('max-h-[calc(100dvh-2rem)]');
+    expect(opcoes?.closeLabel).toBe('Fechar');
+  });
+
   it('não usa cores fixas do Tailwind (desaparecido e localizado)', () => {
     state.idDetalhe = 7;
     state.detalhePessoa = PESSOA;
