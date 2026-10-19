@@ -80,7 +80,8 @@ for (const { sufixo, viewport } of telas) {
     const page = await novaPagina(viewport, { falhar: true });
     await page.goto(baseUrl);
     await esperarErro(page);
-    await page.screenshot({ path: arquivo(`${sufixo}erro`), ...topo(520) });
+    // No celular a mensagem fica abaixo dos filtros: captura a página inteira.
+    await page.screenshot({ path: arquivo(`${sufixo}erro`), ...(celular ? paginaInteira : topo(520)) });
     await page.context().close();
   }
 }

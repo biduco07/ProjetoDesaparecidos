@@ -22,6 +22,12 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | --- | --- |
 | [![Mensagem de erro no lugar da lista, com o botão Tentar de novo](screenshots/erro.png)](screenshots/erro.png) | [![Listagem no celular](screenshots/mobile-listagem.png)](screenshots/mobile-listagem.png) [![Detalhe no celular](screenshots/mobile-detalhe.png)](screenshots/mobile-detalhe.png) |
 
+| Tema claro (listagem) | Tema claro (envio de informações) |
+| --- | --- |
+| [![Listagem no tema claro](screenshots/migracao-spartan/depois-claro-listagem.png)](screenshots/migracao-spartan/depois-claro-listagem.png) | [![Diálogo de envio de informações no tema claro](screenshots/migracao-spartan/depois-claro-dialogo-informacoes.png)](screenshots/migracao-spartan/depois-claro-dialogo-informacoes.png) |
+
+> O app abre no tema escuro; o botão sol/lua do cabeçalho troca para o claro. As capturas de antes e depois da troca do Angular Material pela spartan/ui estão em [`screenshots/migracao-spartan/`](screenshots/migracao-spartan).
+>
 > As capturas usam **dados fictícios**: o script [`scripts/capturas-de-tela.mjs`](scripts/capturas-de-tela.mjs) roda o app de verdade no Chromium (Playwright) e simula as respostas da API Abitus, para não expor dados de pessoas reais e não enviar nada à polícia. Veja [Como gerar as capturas](#como-gerar-as-capturas-de-tela).
 
 ## Funcionalidades
@@ -32,7 +38,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 - Tela de detalhe com situação do caso, local e data do desaparecimento e há quantos dias a pessoa está desaparecida.
 - Se a API falhar, a lista e a tela de detalhe mostram uma mensagem amigável com o botão "Tentar de novo".
 - Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens. A data é validada de verdade (recusa 31/02 e datas futuras) e as imagens precisam ser PNG/JPG de até 3 MB.
-- Acessível (WCAG 2.1 AA): tudo funciona pelo teclado, link "Pular para o conteúdo", foco levado ao conteúdo quando a rota muda, título da aba por página, resultado da busca anunciado para leitores de tela e contraste de 4,5:1. O axe-core não aponta violações e o Lighthouse dá 100 em acessibilidade.
+- Acessível (WCAG 2.1 AA): tudo funciona pelo teclado, link "Pular para o conteúdo", foco levado ao conteúdo quando a rota muda, título da aba por página, resultado da busca e página da lista anunciados para leitores de tela, erros do formulário ligados aos campos e contraste de 4,5:1 (inclusive no botão com o mouse em cima). O axe-core não aponta violações nas cinco telas, no tema escuro e no claro, no desktop e no celular ([`scripts/acessibilidade.mjs`](scripts/acessibilidade.mjs)).
 - Tema escuro (padrão) e claro, com o botão sol/lua no cabeçalho; a escolha fica salva no navegador.
 - Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
 
@@ -49,7 +55,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
 | Layout responsivo                                 | Tailwind: no celular, filtros acima da lista e 1 coluna de cards (2 a partir de 640 px); no desktop, filtros na lateral e 3 colunas                                    |
 | Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; aviso (toast do sonner) no envio de informações                                            |
-| Testes unitários                                  | 124 testes em 11 arquivos (Vitest), cobertura de linhas de ~99%, rodando na CI a cada push e PR                                                                                   |
+| Testes unitários                                  | 124 testes em 11 arquivos (Vitest), cobertura de linhas de ~95% (contando os componentes da spartan em `libs/ui/`), rodando na CI a cada push e PR                                                                                   |
 | Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
 | README com instruções                             | Este arquivo: [como rodar](#como-rodar), [como testar](#como-testar) e [decisões técnicas](#decisões-técnicas)                                     |
 
@@ -202,20 +208,30 @@ npm start   # em outro terminal
 node scripts/capturas-de-tela.mjs http://localhost:4200/ screenshots
 ```
 
-Para usar o Edge ou o Chrome já instalados em vez de baixar o Chromium, defina `PW_CHANNEL=msedge` (ou `chrome`) antes do último comando.
+Para usar o Edge ou o Chrome já instalados em vez de baixar o Chromium, defina `PW_CHANNEL=msedge` (ou `chrome`) antes do último comando. `CAPTURA_TEMA=escuro` (ou `claro`) escolhe o tema e `CAPTURA_PREFIXO=depois-escuro-` muda o nome dos arquivos; foi assim que saíram as capturas de [`screenshots/migracao-spartan/`](screenshots/migracao-spartan).
 
 Os PNGs versionados foram reduzidos para paleta de 256 cores (menos da metade do tamanho) depois de gerados:
 
 ```sh
 npm i --no-save sharp
-node -e "const s=require('sharp'),fs=require('fs');for(const f of fs.readdirSync('screenshots')){const p='screenshots/'+f;s(p).png({palette:true,colors:256,compressionLevel:9}).toBuffer().then(b=>fs.writeFileSync(p,b))}"
+node -e "const s=require('sharp'),fs=require('fs');for(const d of ['screenshots/','screenshots/migracao-spartan/'])for(const f of fs.readdirSync(d)){if(!f.endsWith('.png'))continue;const p=d+f;s(p).png({palette:true,colors:256,compressionLevel:9}).toBuffer().then(b=>fs.writeFileSync(p,b))}"
+```
+
+### Acessibilidade (axe)
+
+O [`scripts/acessibilidade.mjs`](scripts/acessibilidade.mjs) usa a mesma API simulada e roda o axe-core (regras WCAG 2.0 e 2.1, níveis A e AA) na listagem, nos filtros, no detalhe, no diálogo, no aviso de erro e na tela de erro, no tema escuro e no claro, no desktop e no celular. Também mede o contraste do texto do botão principal parado e com o mouse em cima. Sai com erro se achar alguma violação ou contraste abaixo de 4,5:1.
+
+```sh
+npm i --no-save playwright @axe-core/playwright && npx playwright install chromium
+npm run build && npm run serve:ssr:ProjetoDesaparecidos   # em outro terminal
+node scripts/acessibilidade.mjs http://localhost:4000/
 ```
 
 ### Qualidade e CI
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo push para `main`/`dev` e em pull requests: `npm ci`, lint, testes (Vitest) e build de produção.
 
-Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações), os componentes principais (incluindo validação do formulário, teclado e atributos de acessibilidade) e o paginador em português.
+Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações), os componentes principais (incluindo validação do formulário, teclado e atributos de acessibilidade), o paginador (janela de páginas, rótulos e anúncio), o serviço de tema e a ausência de cores fixas do Tailwind nos templates.
 
 ## Docker
 
