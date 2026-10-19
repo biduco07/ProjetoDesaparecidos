@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
+import { TemaService } from './core/tema.service';
+import { classesDeCorFixa } from '../testing/cores-fixas';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [AppComponent],
       providers: [provideRouter([])],
@@ -66,6 +69,51 @@ describe('AppComponent', () => {
 
     expect(document.activeElement).toBe(el.querySelector('main'));
     el.remove();
+  });
+
+  describe('tema', () => {
+    function botaoDeTema(el: HTMLElement): HTMLButtonElement | null {
+      return el.querySelector<HTMLButtonElement>('header button[aria-label^="Usar tema"]');
+    }
+
+    afterEach(() => localStorage.clear());
+
+    it('o botão de tema começa oferecendo o claro (escuro é o padrão)', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+
+      expect(botaoDeTema(fixture.nativeElement)?.getAttribute('aria-label')).toBe(
+        'Usar tema claro'
+      );
+    });
+
+    it('clicar no botão troca o tema e o rótulo do botão', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const el = fixture.nativeElement as HTMLElement;
+
+      botaoDeTema(el)?.click();
+      fixture.detectChanges();
+
+      expect(TestBed.inject(TemaService).modo()).toBe('claro');
+      expect(botaoDeTema(el)?.getAttribute('aria-label')).toBe('Usar tema escuro');
+    });
+  });
+
+  it('tem o toaster dos avisos', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('hlm-toaster')
+    ).not.toBeNull();
+  });
+
+  it('não usa cores fixas do Tailwind (só tokens do tema)', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    expect(classesDeCorFixa(fixture.nativeElement)).toEqual([]);
   });
 
   it('leva o foco ao <main> quando a rota muda (depois da primeira carga)', async () => {

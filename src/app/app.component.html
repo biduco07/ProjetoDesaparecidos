@@ -1,42 +1,56 @@
 <a
   href="#conteudo"
-  class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg"
+  class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
   (click)="pularParaConteudo($event)"
 >
   Pular para o conteúdo
 </a>
-<div
-  class="w-full poppins-regular"
-  style="text-align: -webkit-center !important"
->
-  <header class="bg-gray-700 text-white self-center">
-    <div
-      class="md:max-w-7/10 mb-4 flex flex-wrap gap-3 p-5 justify-between w-full"
-    >
-      <div class="flex gap-3">
-        <button
-          type="button"
-          class="self-center cursor-pointer"
-          aria-label="Ir para a página inicial"
-          (click)="enviaInicio()"
-        >
-          <img
-            class="font-bold"
-            width="100"
-            height="71"
-            src="./assets/brasao.png"
-            alt=""
-          />
-        </button>
-        <span class="text-xl max-w-60 self-center">
-          Polícia Judiciária Civil Estado de Mato Grosso
-        </span>
-      </div>
-
-      <h1 class="text-3xl self-center">Desaparecidos</h1>
+<header class="border-b bg-card text-card-foreground">
+  <div
+    class="mx-auto flex w-full flex-wrap items-center justify-between gap-3 px-4 py-4 md:max-w-7/10 md:px-0"
+  >
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        class="cursor-pointer rounded-md"
+        aria-label="Ir para a página inicial"
+        (click)="enviaInicio()"
+      >
+        <img width="100" height="71" src="./assets/brasao.png" alt="" />
+      </button>
+      <span class="max-w-60 text-lg leading-snug">
+        Polícia Judiciária Civil Estado de Mato Grosso
+      </span>
     </div>
-  </header>
-  <main #conteudo id="conteudo" tabindex="-1" class="px-3 md:px-0 md:max-w-7/10 outline-none">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+
+    <div class="flex items-center gap-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Desaparecidos</h1>
+      <!-- Um ícone só, com o nome trocado por binding: o HTML pré-renderizado
+           e o navegador têm a mesma estrutura (sem @if), então a hidratação
+           não diverge quando a pessoa escolheu o claro. -->
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        type="button"
+        [attr.aria-label]="rotuloDoTema()"
+        [attr.title]="rotuloDoTema()"
+        (click)="tema.alternar()"
+      >
+        <ng-icon
+          [name]="tema.modo() === 'escuro' ? 'lucideSun' : 'lucideMoon'"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+  </div>
+</header>
+<main
+  #conteudo
+  id="conteudo"
+  tabindex="-1"
+  class="mx-auto w-full px-4 py-6 outline-none md:max-w-7/10 md:px-0"
+>
+  <router-outlet />
+</main>
+<hlm-toaster [theme]="tema.modo() === 'escuro' ? 'dark' : 'light'" />
