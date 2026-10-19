@@ -14,7 +14,8 @@
     "src/server.ts"
   ],
   "include": [
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "libs/ui/**/src/**/*.ts"
   ],
   "angularCompilerOptions": {
     "extendedDiagnostics": {
