@@ -6,7 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { MatDialog } from '@angular/material/dialog';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
 
 import { DesaparecidosDetalheComponent } from './desaparecidos-detalhe.component';
 import { DesaparecidosState } from '../../state/desaparecidos.state';
@@ -16,6 +16,7 @@ import {
 } from '../../desaparecidos.facade';
 import { IPessoas } from '../../models/pessoas.model';
 import { environment } from '../../../../../environments/environment';
+import { classesDeCorFixa } from '../../../../../testing/cores-fixas';
 
 const PESSOA = {
   id: 7,
@@ -162,17 +163,38 @@ describe('DesaparecidosDetalheComponent', () => {
     state.idDetalhe = 7;
     state.detalhePessoa = PESSOA;
     criarComponente();
-    const dialog = fixture.debugElement.injector.get(MatDialog);
+    const dialog = TestBed.inject(HlmDialogService);
     const open = vi.spyOn(dialog, 'open').mockReturnValue(undefined as never);
 
-    component.openDialog();
+    Array.from(elemento().querySelectorAll('button'))
+      .find((b) => b.textContent?.includes('Encontrou Essa Pessoa?'))
+      ?.click();
 
     expect(open).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        data: { id: 99, descricao: 'MARIA DA SILVA' },
+        context: { id: 99, descricao: 'MARIA DA SILVA' },
       })
     );
+  });
+
+  it('não usa cores fixas do Tailwind (desaparecido e localizado)', () => {
+    state.idDetalhe = 7;
+    state.detalhePessoa = PESSOA;
+    criarComponente();
+    expect(classesDeCorFixa(elemento())).toEqual([]);
+
+    state.detalhePessoa = {
+      ...PESSOA,
+      ultimaOcorrencia: {
+        ...PESSOA.ultimaOcorrencia,
+        dataLocalizacao: new Date('2024-02-01T00:00:00'),
+        encontradoVivo: true,
+      },
+    } as IPessoas;
+    fixture.detectChanges();
+    expect(elemento().textContent).toContain('Localizado');
+    expect(classesDeCorFixa(elemento())).toEqual([]);
   });
 
   describe('carregamento a partir da API', () => {
@@ -194,7 +216,7 @@ describe('DesaparecidosDetalheComponent', () => {
     });
 
     it('mostra um indicador de carregamento enquanto a pessoa não chega', () => {
-      expect(elemento().querySelector('mat-spinner')).not.toBeNull();
+      expect(elemento().querySelector('hlm-spinner')).not.toBeNull();
       expect(elemento().querySelector('[role="alert"]')).toBeNull();
 
       httpMock.expectOne(urlDetalhe).flush(PESSOA);
@@ -207,7 +229,8 @@ describe('DesaparecidosDetalheComponent', () => {
         MENSAGEM_ERRO_DETALHE
       );
       expect(botaoTentarDeNovo()).toBeDefined();
-      expect(elemento().querySelector('mat-spinner')).toBeNull();
+      expect(elemento().querySelector('hlm-spinner')).toBeNull();
+      expect(classesDeCorFixa(elemento())).toEqual([]);
     });
 
     it('busca a pessoa de novo ao clicar em "Tentar de novo"', () => {
@@ -217,12 +240,12 @@ describe('DesaparecidosDetalheComponent', () => {
       fixture.detectChanges();
 
       expect(elemento().querySelector('[role="alert"]')).toBeNull();
-      expect(elemento().querySelector('mat-spinner')).not.toBeNull();
+      expect(elemento().querySelector('hlm-spinner')).not.toBeNull();
 
       httpMock.expectOne(urlDetalhe).flush(PESSOA);
       fixture.detectChanges();
 
-      expect(elemento().querySelector('mat-spinner')).toBeNull();
+      expect(elemento().querySelector('hlm-spinner')).toBeNull();
       expect(elemento().textContent).toContain('MARIA DA SILVA');
     });
   });

@@ -12,11 +12,18 @@ import { IPessoas } from '../../models/pessoas.model';
 import { DatePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideCircleAlert,
+  lucideMessageSquareText,
+  lucideRefreshCw,
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmDialogService } from '@spartan-ng/helm/dialog';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { DesaparecidosDetalheDialogComponent } from './dialog/desaparecidos-detalhe-dialog.component';
 
 const UM_DIA_EM_MS = 1000 * 60 * 60 * 24;
@@ -26,19 +33,25 @@ const UM_DIA_EM_MS = 1000 * 60 * 60 * 24;
   imports: [
     DatePipe,
     NgClass,
-    MatCardModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
+    NgIcon,
+    HlmAlertImports,
+    HlmButtonImports,
+    HlmCardImports,
+    HlmSpinnerImports,
   ],
-  standalone: true,
+  providers: [
+    provideIcons({
+      lucideArrowLeft,
+      lucideCircleAlert,
+      lucideMessageSquareText,
+      lucideRefreshCw,
+    }),
+  ],
   templateUrl: './desaparecidos-detalhe.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './desaparecidos-detalhe.component.scss',
 })
 export class DesaparecidosDetalheComponent {
-  private dialog = inject(MatDialog);
+  private dialog = inject(HlmDialogService);
   private _facade = inject(DesaparecidosFacade);
   private router = inject(Router);
   private title = inject(Title);
@@ -97,11 +110,12 @@ export class DesaparecidosDetalheComponent {
   openDialog(): void {
     const pessoa = this.pessoa();
     this.dialog.open(DesaparecidosDetalheDialogComponent, {
-      data: {
+      context: {
         id: pessoa?.ultimaOcorrencia?.ocoId,
         descricao: pessoa?.nome,
       },
-      width: '600px', // Tamanho do diálogo
+      contentClass: 'sm:max-w-xl',
+      closeLabel: 'Fechar',
     });
   }
 }
