@@ -55,7 +55,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
 | Layout responsivo                                 | Tailwind: no celular, filtros acima da lista e 1 coluna de cards (2 a partir de 640 px); no desktop, filtros na lateral e 3 colunas                                    |
 | Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; aviso (toast do sonner) no envio de informações                                            |
-| Testes unitários                                  | 130 testes em 11 arquivos (Vitest), cobertura de linhas de ~95% (contando os componentes da spartan em `libs/ui/`), rodando na CI a cada push e PR                                                                                   |
+| Testes unitários                                  | 135 testes em 11 arquivos (Vitest), cobertura de linhas de ~95% (contando os componentes da spartan em `libs/ui/`), rodando na CI a cada push e PR                                                                                   |
 | Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
 | README com instruções                             | Este arquivo: [como rodar](#como-rodar), [como testar](#como-testar) e [decisões técnicas](#decisões-técnicas)                                     |
 
@@ -98,7 +98,7 @@ Isso mantém os componentes simples, concentra regras de negócio em um único p
 - **nginx com cabeçalhos de segurança e cache por tipo de arquivo:** CSP, `X-Frame-Options` e `nosniff`; JS/CSS com hash ficam em cache por 1 ano e o HTML nunca fica em cache, então um deploy novo chega na hora.
 - **spartan/ui com o tema NuvyTech no lugar do Angular Material:** os componentes "helm" da spartan são copiados para [`libs/ui/`](libs/ui) (o código fica no projeto, como no shadcn/ui) e usam os tokens do tema ([`src/styles/nuvy-tema.css`](src/styles/nuvy-tema.css), cópia do nuvy-ui). Os templates só usam tokens (`bg-primary`, `text-destructive`, `text-muted-foreground`...), então o claro e o escuro funcionam sozinhos; os testes falham se aparecer uma cor fixa do Tailwind.
 - **Paginador próprio:** a paginação da spartan é só visual e navega por `routerLink`; aqui a página fica no state. O `app-paginador` calcula a janela (primeira, última, a atual com as vizinhas e reticências), usa rótulos em português e anuncia "Página N de M".
-- **Bundle inicial enxuto (~435 kB; era 590 kB antes do PR #12):** o `ngx-mask` é registrado só no diálogo que usa a máscara, e o toaster dos avisos carrega num `@defer (on idle)`. O botão de tema do cabeçalho usa as classes do `hlmBtn` sem a diretiva: ela traria o `tailwind-merge` e o overlay do CDK para o bundle inicial.
+- **Bundle inicial enxuto (~443 kB; era 590 kB antes do PR #12):** o `ngx-mask` é registrado só no diálogo que usa a máscara, e o toaster dos avisos carrega num `@defer (on idle)`. O botão de tema do cabeçalho usa as classes do `hlmBtn` sem a diretiva: ela traria o `tailwind-merge` e o overlay do CDK para o bundle inicial.
 - **Demo estática no GitHub Pages:** a configuração `pages` gera só os arquivos do navegador em `docs/`, sem precisar de servidor Node.
 
 ## Estrutura de pastas
@@ -182,11 +182,11 @@ O servidor Express do Angular SSR sobe em `http://localhost:4000/` (porta config
 
 ```sh
 npm run lint      # ESLint (angular-eslint)
-npm run test:ci   # 130 testes unitários com Vitest + jsdom
+npm run test:ci   # 135 testes unitários com Vitest + jsdom
 npm run build     # build de produção com SSR e pré-renderização
 ```
 
-São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~435 kB (cerca de 115 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json` (o build falha acima de 550 kB, para um import que traga o overlay do CDK de volta não passar em silêncio).
+São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~443 kB (cerca de 117 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json` (o build falha acima de 550 kB, para um import que traga o overlay do CDK de volta não passar em silêncio).
 
 ### Roteiro manual
 
