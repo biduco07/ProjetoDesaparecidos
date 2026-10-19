@@ -33,6 +33,7 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 - Se a API falhar, a lista e a tela de detalhe mostram uma mensagem amigável com o botão "Tentar de novo".
 - Formulário em diálogo para enviar informações sobre a pessoa, com máscara de data e upload de imagens. A data é validada de verdade (recusa 31/02 e datas futuras) e as imagens precisam ser PNG/JPG de até 3 MB.
 - Acessível (WCAG 2.1 AA): tudo funciona pelo teclado, link "Pular para o conteúdo", foco levado ao conteúdo quando a rota muda, título da aba por página, resultado da busca anunciado para leitores de tela e contraste de 4,5:1. O axe-core não aponta violações e o Lighthouse dá 100 em acessibilidade.
+- Tema escuro (padrão) e claro, com o botão sol/lua no cabeçalho; a escolha fica salva no navegador.
 - Renderização no servidor (Angular SSR) com pré-renderização das rotas; os dados da API são sempre buscados no navegador, então o HTML gerado no build não guarda um retrato desatualizado da lista.
 
 ## Requisitos do teste e onde estão atendidos
@@ -40,22 +41,22 @@ Projeto desenvolvido como teste prático do **Processo Seletivo SEPLAG/MT** — 
 | Requisito                                         | Como foi atendido                                                                                                                                  |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Consumir a API pública Abitus                      | `DesaparecidosService` (`/v1/pessoas/aberto/filtro`, `/v1/pessoas/{id}`, `/v1/pessoas/aberto/estatistico` e `POST /v1/ocorrencias/informacoes-desaparecido`) |
-| Listagem em cards com foto e dados da pessoa       | Cards do Angular Material com foto (ou imagem padrão), nome, idade, sexo, data e local do desaparecimento                                          |
-| Paginação                                         | `mat-paginator` com 12 registros por página, paginação feita pela própria API                                                                      |
+| Listagem em cards com foto e dados da pessoa       | Cartões da spartan/ui com foto (ou imagem padrão), nome, idade, sexo, data e local do desaparecimento                                              |
+| Paginação                                         | Paginador próprio (`app-paginador`) com 12 registros por página, reticências e a página anunciada ao leitor de tela; paginação feita pela própria API |
 | Busca e filtros                                   | Nome, faixa etária, sexo e status; "Limpar" volta à consulta inicial                                                                              |
 | Detalhe com destaque da situação                   | Faixa e borda vermelhas (desaparecido) ou verdes (localizado), dados da ocorrência e dias desde o desaparecimento                                  |
 | Envio de informações sobre a pessoa                | Diálogo com informação, data com máscara (`ngx-mask`) e várias imagens com pré-visualização, enviado como `multipart/form-data`                    |
 | Rotas com carregamento sob demanda (lazy loading) | `loadComponent` nas rotas `/` e `/detalhe` (`app.routes.ts`)                                                                                       |
 | Layout responsivo                                 | Tailwind: no celular, filtros acima da lista e 1 coluna de cards (2 a partir de 640 px); no desktop, filtros na lateral e 3 colunas                                    |
-| Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; alerta (snackbar) no envio de informações                                            |
-| Testes unitários                                  | 90 testes em 9 arquivos (Vitest), cobertura de linhas de ~99%, rodando na CI a cada push e PR                                                                                   |
+| Tratamento de erros                               | Mensagem amigável com "Tentar de novo" na lista e no detalhe; aviso (toast do sonner) no envio de informações                                            |
+| Testes unitários                                  | 124 testes em 11 arquivos (Vitest), cobertura de linhas de ~99%, rodando na CI a cada push e PR                                                                                   |
 | Empacotamento em contêiner                        | `Dockerfile` multi-stage (build com Node, servido por nginx)                                                                                       |
 | README com instruções                             | Este arquivo: [como rodar](#como-rodar), [como testar](#como-testar) e [decisões técnicas](#decisões-técnicas)                                     |
 
 ## Stack
 
 - [Angular 22](https://angular.dev/) (standalone components, `inject()`, control flow `@if`/`@for`, SSR)
-- [Angular Material](https://material.angular.io/)
+- [spartan/ui](https://spartan.ng/) 1.8 (estilo `vega`), com o tema NuvyTech (repositório nuvy-ui, privado): escuro por padrão, fonte [Inter](https://rsms.me/inter/) servida pelo próprio site e ícones [Lucide](https://lucide.dev/) (`@ng-icons/lucide`)
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [RxJS](https://rxjs.dev/)
 - [NgxMask](https://github.com/JsDaddy/ngx-mask)
@@ -89,7 +90,9 @@ Isso mantém os componentes simples, concentra regras de negócio em um único p
 - **Vitest + jsdom em vez de Karma:** os testes rodam sem abrir navegador, mais rápido na máquina e na CI, com o builder oficial `@angular/build:unit-test`.
 - **Cards com um botão de verdade dentro:** o card inteiro continua clicável, mas o nome da pessoa é um `<button>`, para o card abrir pelo teclado e ser anunciado corretamente por leitores de tela.
 - **nginx com cabeçalhos de segurança e cache por tipo de arquivo:** CSP, `X-Frame-Options` e `nosniff`; JS/CSS com hash ficam em cache por 1 ano e o HTML nunca fica em cache, então um deploy novo chega na hora.
-- **Bundle inicial enxuto (422 kB, antes 590 kB):** o `ngx-mask` é registrado só no diálogo que usa a máscara, então fica num chunk carregado sob demanda. O tema do Material ([`src/material-theme.scss`](src/material-theme.scss)) inclui só os componentes usados, em vez do tema prebuilt com todos.
+- **spartan/ui com o tema NuvyTech no lugar do Angular Material:** os componentes "helm" da spartan são copiados para [`libs/ui/`](libs/ui) (o código fica no projeto, como no shadcn/ui) e usam os tokens do tema ([`src/styles/nuvy-tema.css`](src/styles/nuvy-tema.css), cópia do nuvy-ui). Os templates só usam tokens (`bg-primary`, `text-destructive`, `text-muted-foreground`...), então o claro e o escuro funcionam sozinhos; os testes falham se aparecer uma cor fixa do Tailwind.
+- **Paginador próprio:** a paginação da spartan é só visual e navega por `routerLink`; aqui a página fica no state. O `app-paginador` calcula a janela (primeira, última, a atual com as vizinhas e reticências), usa rótulos em português e anuncia "Página N de M".
+- **Bundle inicial enxuto (~435 kB; era 590 kB antes do PR #12):** o `ngx-mask` é registrado só no diálogo que usa a máscara, e o toaster dos avisos carrega num `@defer (on idle)`. O botão de tema do cabeçalho usa as classes do `hlmBtn` sem a diretiva: ela traria o `tailwind-merge` e o overlay do CDK para o bundle inicial.
 - **Demo estática no GitHub Pages:** a configuração `pages` gera só os arquivos do navegador em `docs/`, sem precisar de servidor Node.
 
 ## Estrutura de pastas
@@ -106,13 +109,29 @@ src/
         state/                  # DesaparecidosState (BehaviorSubjects)
         desaparecidos.facade.ts # Facade da feature
     shared/
-      paginacao/                # modelos de paginação
+      paginacao/                # modelos de paginação e o paginador próprio
   assets/
+  styles/nuvy-tema.css          # tema NuvyTech (cópia do nuvy-ui; não edite aqui)
+libs/ui/                        # componentes helm da spartan/ui (gerados pelo CLI)
+public/nuvy-tema.js             # põe o escuro antes da primeira pintura
   environments/                 # configuração por ambiente (URL da API)
 scripts/                        # script que gera as capturas de tela
 screenshots/                    # capturas usadas neste README
 docs/                           # build da demo publicada no GitHub Pages
 ```
+
+## Tema e componentes (spartan/ui)
+
+- **Tema:** [`src/styles/nuvy-tema.css`](src/styles/nuvy-tema.css) é uma cópia do tema NuvyTech do repositório nuvy-ui. Para atualizar, rode `npm run copiar -- <pasta deste projeto>` dentro do nuvy-ui e abra um PR com o arquivo novo. Não edite a cópia à mão.
+- **Escuro e claro:** [`public/nuvy-tema.js`](public/nuvy-tema.js), no `<head>`, põe a classe `.dark` no `<html>` antes da primeira pintura (escuro por padrão). O [`TemaService`](src/app/core/tema.service.ts) liga o botão do cabeçalho e grava a escolha no `localStorage` (chave `nuvy-tema`); no servidor ele não mexe no DOM.
+- **Componentes:** os da spartan ficam em [`libs/ui/`](libs/ui) e são importados por `@spartan-ng/helm/<nome>` (caminhos no `tsconfig.json`). O estilo (`vega`) e a pasta estão no [`components.json`](components.json). Para gerar outro componente, sem deixar o CLI (que traz o Nx) no `package.json`:
+
+  ```sh
+  npm i --no-save @spartan-ng/cli@1.8.0
+  npx ng g @spartan-ng/cli:ui <nome>   # ex.: select, tooltip
+  ```
+
+  O CLI cria a pasta `.nx/` (ignorada pelo git). Não rode o `ng g @spartan-ng/cli:init` nem o `ui-theme`: eles gravam no `styles.css` cores que passam por cima do tema.
 
 ## Como rodar
 
@@ -157,11 +176,11 @@ O servidor Express do Angular SSR sobe em `http://localhost:4000/` (porta config
 
 ```sh
 npm run lint      # ESLint (angular-eslint)
-npm run test:ci   # 90 testes unitários com Vitest + jsdom
+npm run test:ci   # 124 testes unitários com Vitest + jsdom
 npm run build     # build de produção com SSR e pré-renderização
 ```
 
-São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~422 kB (cerca de 110 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json`.
+São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~435 kB (cerca de 115 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json`.
 
 ### Roteiro manual
 
