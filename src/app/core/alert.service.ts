@@ -1,4 +1,11 @@
-import { Injectable, InjectionToken, inject } from '@angular/core';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  Injectable,
+  InjectionToken,
+  PLATFORM_ID,
+  inject,
+} from '@angular/core';
 import { toast } from '@spartan-ng/brain/sonner';
 
 /** Parte do `toast` do sonner da spartan que o app usa. */
@@ -21,14 +28,31 @@ const FECHAR = { label: 'Fechar', onClick: () => undefined };
 })
 export class AlertService {
   private notificador = inject(NOTIFICADOR);
+  private anunciador = inject(LiveAnnouncer);
+  private noNavegador = isPlatformBrowser(inject(PLATFORM_ID));
 
   /** Aviso de sucesso (ex.: informação enviada). */
   showSuccess(message: string): void {
     this.notificador.success(message, { action: FECHAR });
+    this.anunciar(message, 'polite');
   }
 
   /** Aviso de erro (ex.: envio falhou, arquivo recusado). */
   showError(message: string): void {
     this.notificador.error(message, { action: FECHAR });
+    this.anunciar(message, 'assertive');
+  }
+
+  /**
+   * Repete a mensagem para o leitor de tela. A região do sonner nasce já com
+   * o texto (no primeiro aviso, e dentro do @defer do toaster), e vários
+   * leitores de tela não anunciam região que nasce com conteúdo; o
+   * LiveAnnouncer do CDK usa uma região aria-live que já existe, como o
+   * MatSnackBar fazia.
+   */
+  private anunciar(mensagem: string, prioridade: 'polite' | 'assertive'): void {
+    if (this.noNavegador) {
+      void this.anunciador.announce(mensagem, prioridade);
+    }
   }
 }
