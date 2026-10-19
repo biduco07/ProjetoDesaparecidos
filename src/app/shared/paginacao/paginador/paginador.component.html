@@ -2,14 +2,21 @@
   <p class="text-sm text-muted-foreground">{{ intervalo() }}</p>
 
   <nav aria-label="Paginação">
-    <ul class="flex flex-row flex-wrap items-center justify-center gap-1">
+    <!-- No celular os botões ficam com 32 px e menos espaço entre eles: as 9
+         posições (anterior, 7 páginas, próxima) cabem numa linha a partir de
+         ~310 px. -->
+    <ul class="flex flex-row flex-wrap items-center justify-center gap-0.5 sm:gap-1">
       <li>
+        <!-- aria-disabled (e não disabled) nas pontas: com disabled o foco do
+             teclado cairia no <body> ao chegar à primeira/última página.
+             O clique é barrado em ir(). -->
         <button
           hlmBtn
           variant="ghost"
           type="button"
+          class="max-sm:size-8 max-sm:px-0"
           aria-label="Página anterior"
-          [disabled]="naPrimeira()"
+          [attr.aria-disabled]="naPrimeira() ? 'true' : null"
           (click)="ir(pagina() - 1)"
         >
           <ng-icon name="lucideChevronLeft" aria-hidden="true" />
@@ -22,7 +29,7 @@
       @for (item of janela(); track item === 'reticencias' ? 'reticencias-' + $index : item) {
       <li>
         @if (item === 'reticencias') {
-        <span class="flex size-9 items-center justify-center text-muted-foreground">
+        <span class="flex size-8 items-center justify-center text-muted-foreground sm:size-9">
           <ng-icon name="lucideEllipsis" aria-hidden="true" />
           <span class="sr-only">Mais páginas</span>
         </span>
@@ -32,6 +39,7 @@
           [variant]="item === pagina() ? 'outline' : 'ghost'"
           size="icon"
           type="button"
+          class="max-sm:size-8"
           [attr.aria-label]="'Página ' + (item + 1)"
           [attr.aria-current]="item === pagina() ? 'page' : null"
           (click)="ir(item)"
@@ -47,8 +55,9 @@
           hlmBtn
           variant="ghost"
           type="button"
+          class="max-sm:size-8 max-sm:px-0"
           aria-label="Próxima página"
-          [disabled]="naUltima()"
+          [attr.aria-disabled]="naUltima() ? 'true' : null"
           (click)="ir(pagina() + 1)"
         >
           <span class="hidden sm:inline">Próxima</span>

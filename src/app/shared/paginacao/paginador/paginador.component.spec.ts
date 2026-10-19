@@ -19,8 +19,18 @@ describe('PaginadorComponent', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  function botao(el: HTMLElement, rotulo: string): HTMLButtonElement | null {
-    return el.querySelector<HTMLButtonElement>(`button[aria-label="${rotulo}"]`);
+  /** Botão pelo rótulo; falha se ele não existir (um clique em null passaria calado). */
+  function botao(el: HTMLElement, rotulo: string): HTMLButtonElement {
+    const encontrado = el.querySelector<HTMLButtonElement>(
+      `button[aria-label="${rotulo}"]`
+    );
+    expect(encontrado, `botão "${rotulo}"`).not.toBeNull();
+    return encontrado!;
+  }
+
+  /** "Desabilitado" por aria-disabled: o botão continua no Tab e com o foco. */
+  function desabilitado(b: HTMLButtonElement): boolean {
+    return b.getAttribute('aria-disabled') === 'true' && !b.disabled;
   }
 
   /** Botões com o número de uma página ("Página 3"), sem anterior/próxima. */
@@ -48,27 +58,52 @@ describe('PaginadorComponent', () => {
   it('marca só a página atual com aria-current', () => {
     const el = montar(0, 25);
 
-    expect(botao(el, 'Página 1')?.getAttribute('aria-current')).toBe('page');
-    expect(botao(el, 'Página 2')?.hasAttribute('aria-current')).toBe(false);
-    expect(botao(el, 'Página 3')?.hasAttribute('aria-current')).toBe(false);
+    expect(botao(el, 'Página 1').getAttribute('aria-current')).toBe('page');
+    expect(botao(el, 'Página 2').hasAttribute('aria-current')).toBe(false);
+    expect(botao(el, 'Página 3').hasAttribute('aria-current')).toBe(false);
   });
 
-  it('desabilita "Página anterior" na primeira e "Próxima página" na última', () => {
+  it('marca "Página anterior" na primeira e "Próxima página" na última com aria-disabled (sem disabled)', () => {
     let el = montar(0, 25);
-    expect(botao(el, 'Página anterior')?.disabled).toBe(true);
-    expect(botao(el, 'Próxima página')?.disabled).toBe(false);
+    expect(desabilitado(botao(el, 'Página anterior'))).toBe(true);
+    expect(botao(el, 'Próxima página').hasAttribute('aria-disabled')).toBe(false);
 
     el = montar(2, 25);
-    expect(botao(el, 'Página anterior')?.disabled).toBe(false);
-    expect(botao(el, 'Próxima página')?.disabled).toBe(true);
+    expect(botao(el, 'Página anterior').hasAttribute('aria-disabled')).toBe(false);
+    expect(desabilitado(botao(el, 'Próxima página'))).toBe(true);
+  });
+
+  it('não emite ao clicar em "Página anterior"/"Próxima página" nas pontas', () => {
+    let el = montar(0, 25);
+    botao(el, 'Página anterior').click();
+    expect(emitidos).toEqual([]);
+
+    el = montar(2, 25);
+    botao(el, 'Próxima página').click();
+    expect(emitidos).toEqual([]);
+  });
+
+  it('o foco continua em "Próxima página" quando ela chega à última página', () => {
+    const el = montar(1, 25);
+    document.body.appendChild(el);
+    const proxima = botao(el, 'Próxima página');
+    proxima.focus();
+
+    proxima.click();
+    fixture.componentRef.setInput('pagina', emitidos[0].pagina);
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(proxima);
+    expect(desabilitado(proxima)).toBe(true);
+    el.remove();
   });
 
   it('emite a página escolhida (próxima, anterior ou pelo número)', () => {
     const el = montar(1, 25);
 
-    botao(el, 'Próxima página')?.click();
-    botao(el, 'Página anterior')?.click();
-    botao(el, 'Página 3')?.click();
+    botao(el, 'Próxima página').click();
+    botao(el, 'Página anterior').click();
+    botao(el, 'Página 3').click();
 
     expect(emitidos).toEqual([
       { pagina: 2, tamanho: 12 },
@@ -80,7 +115,7 @@ describe('PaginadorComponent', () => {
   it('não emite ao clicar na página atual', () => {
     const el = montar(1, 25);
 
-    botao(el, 'Página 2')?.click();
+    botao(el, 'Página 2').click();
 
     expect(emitidos).toEqual([]);
   });
@@ -89,7 +124,7 @@ describe('PaginadorComponent', () => {
     const el = montar(0, 1248);
 
     expect(el.textContent).toContain('Mais páginas');
-    expect(botao(el, 'Página 104')).not.toBeNull();
+    botao(el, 'Página 104');
     expect(botoesDeNumero(el).length).toBe(6);
   });
 
@@ -98,8 +133,8 @@ describe('PaginadorComponent', () => {
 
     expect(el.textContent).toContain('0 de 0');
     expect(botoesDeNumero(el).length).toBe(0);
-    expect(botao(el, 'Página anterior')?.disabled).toBe(true);
-    expect(botao(el, 'Próxima página')?.disabled).toBe(true);
+    expect(desabilitado(botao(el, 'Página anterior'))).toBe(true);
+    expect(desabilitado(botao(el, 'Próxima página'))).toBe(true);
   });
 
   it('não usa cores fixas do Tailwind', () => {
