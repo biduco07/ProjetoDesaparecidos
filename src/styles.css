@@ -9,6 +9,9 @@
 @import 'tailwindcss/preflight.css' layer(base);
 @import 'tailwindcss/utilities.css' layer(utilities) source(none);
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
+/* Sem o Material, o CDK precisa do próprio CSS para esconder o texto do LiveAnnouncer
+   (cdk-visually-hidden); sem ele, cada aviso anunciado aparece no fim da página. */
+@import '@angular/cdk/a11y-prebuilt.css';
 @import '@fontsource-variable/inter';
 @import './styles/nuvy-tema.css';
 
