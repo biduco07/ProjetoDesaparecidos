@@ -6,7 +6,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import {
   FormBuilder,
@@ -36,7 +35,6 @@ import { IConsulta } from '../models/consulta.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatButtonModule,
-    MatSelectModule,
     MatInputModule,
     FormsModule,
     ReactiveFormsModule,

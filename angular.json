@@ -34,7 +34,7 @@
               }
             ],
             "styles": [
-              "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/material-theme.scss",
               "src/styles.css"
             ],
             "scripts": [],

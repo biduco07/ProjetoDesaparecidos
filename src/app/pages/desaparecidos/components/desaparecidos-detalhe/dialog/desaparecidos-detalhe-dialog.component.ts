@@ -25,9 +25,8 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { DesaparecidosFacade } from '../../../desaparecidos.facade';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { NgxMaskDirective } from 'ngx-mask';
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { AlertService } from '../../../../../core/alert.service';
 
 /** Tamanho máximo de cada imagem, informado ao usuário no formulário. */
@@ -82,11 +81,11 @@ export interface ImagemSelecionada {
     FormsModule,
     ReactiveFormsModule,
     MatIconModule,
-    MatDatepickerModule,
     MatFormFieldModule,
     NgxMaskDirective,
   ],
   standalone: true,
+  providers: [provideNgxMask()],
   templateUrl: './desaparecidos-detalhe-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './desaparecidos-detalhe-dialog.component.scss',

@@ -89,6 +89,7 @@ Isso mantém os componentes simples, concentra regras de negócio em um único p
 - **Vitest + jsdom em vez de Karma:** os testes rodam sem abrir navegador, mais rápido na máquina e na CI, com o builder oficial `@angular/build:unit-test`.
 - **Cards com um botão de verdade dentro:** o card inteiro continua clicável, mas o nome da pessoa é um `<button>`, para o card abrir pelo teclado e ser anunciado corretamente por leitores de tela.
 - **nginx com cabeçalhos de segurança e cache por tipo de arquivo:** CSP, `X-Frame-Options` e `nosniff`; JS/CSS com hash ficam em cache por 1 ano e o HTML nunca fica em cache, então um deploy novo chega na hora.
+- **Bundle inicial enxuto (422 kB, antes 590 kB):** o `ngx-mask` é registrado só no diálogo que usa a máscara, então fica num chunk carregado sob demanda. O tema do Material ([`src/material-theme.scss`](src/material-theme.scss)) inclui só os componentes usados, em vez do tema prebuilt com todos.
 - **Demo estática no GitHub Pages:** a configuração `pages` gera só os arquivos do navegador em `docs/`, sem precisar de servidor Node.
 
 ## Estrutura de pastas
@@ -160,7 +161,7 @@ npm run test:ci   # 90 testes unitários com Vitest + jsdom
 npm run build     # build de produção com SSR e pré-renderização
 ```
 
-São os mesmos passos da CI. O build avisa que o bundle inicial (~590 kB) passa do orçamento de aviso de 500 kB do `angular.json`; não é erro (o limite de erro é 1 MB).
+São os mesmos passos da CI. O build termina sem avisos: o bundle inicial tem ~422 kB (cerca de 110 kB transferidos com compressão), dentro do orçamento de 500 kB do `angular.json`.
 
 ### Roteiro manual
 
