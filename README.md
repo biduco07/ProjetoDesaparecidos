@@ -96,6 +96,7 @@ A aplicação fica disponível em `http://localhost:4200/`.
 | `npm start`           | Servidor de desenvolvimento                         |
 | `npm test`            | Testes unitários (Vitest) em modo watch             |
 | `npm run test:ci`     | Testes uma única vez (jsdom, sem abrir navegador)   |
+| `npm run test:coverage` | Testes com relatório de cobertura em `coverage/`  |
 | `npm run lint`        | ESLint com as regras do angular-eslint              |
 | `npm run build`       | Build de produção em `dist/projeto-desaparecidos`   |
 | `npm run build:pages` | Build de produção da demo em `docs/` (GitHub Pages) |
@@ -104,11 +105,11 @@ A aplicação fica disponível em `http://localhost:4200/`.
 
 O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo push para `main`/`dev` e em pull requests: `npm ci`, lint, testes (Vitest) e build de produção.
 
-Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações) e os componentes principais.
+Os testes cobrem o `DesaparecidosService` (URLs e parâmetros com `HttpTestingController`), a facade e o state (carregamento, paginação, filtros, detalhe e envio de informações), os componentes principais (incluindo validação do formulário, teclado e atributos de acessibilidade) e o paginador em português.
 
 ### Docker
 
-O `Dockerfile` é multi-stage: a primeira etapa (Node) instala as dependências com `npm ci` e gera o build; a segunda (`nginx:alpine`) serve apenas os arquivos estáticos com o `nginx.conf` do projeto. Não é preciso ter Node instalado na máquina.
+O `Dockerfile` é multi-stage: a primeira etapa (Node) instala as dependências com `npm ci` e gera o build; a segunda (`nginx:stable-alpine`) serve apenas os arquivos estáticos com a configuração da pasta [`nginx/`](nginx): cabeçalhos de segurança (CSP, `X-Frame-Options`, `nosniff` etc.), cache longo para JS/CSS com hash e `no-cache` para o HTML, e fallback da SPA para o `index.csr.html`. Não é preciso ter Node instalado na máquina.
 
 ```sh
 docker build -t projeto-desaparecidos .

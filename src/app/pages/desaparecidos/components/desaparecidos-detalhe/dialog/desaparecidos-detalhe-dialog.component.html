@@ -1,45 +1,80 @@
-<div mat-dialog-title class="font-semibold flex text-center">Formulário</div>
+<h2 mat-dialog-title class="font-semibold flex text-center">
+  Enviar informações sobre {{ data.descricao }}
+</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="form" class="gap-2 h-full">
+  <form
+    id="form-informacao"
+    [formGroup]="form"
+    class="gap-2 h-full"
+    novalidate
+    (ngSubmit)="onSend()"
+  >
     <div class="pt-2 px-4">
-      <mat-form-field class="w-full">
+      <mat-form-field
+        class="w-full"
+        appearance="outline"
+        subscriptSizing="dynamic"
+      >
         <mat-label>Informação</mat-label>
-        <input matInput type="text" formControlName="informacao" />
+        <textarea
+          matInput
+          formControlName="informacao"
+          rows="3"
+        ></textarea>
+        @if (form.controls['informacao'].invalid) {
+        <mat-error>Descreva o que você sabe sobre a pessoa.</mat-error>
+        }
       </mat-form-field>
     </div>
     <div class="pt-2 px-4">
-      <mat-form-field class="w-50">
-        <mat-label>Data Localizado</mat-label>
-
+      <mat-form-field
+        class="w-full sm:w-80"
+        appearance="outline"
+        subscriptSizing="dynamic"
+      >
+        <mat-label>Data em que a pessoa foi vista</mat-label>
         <input
           matInput
           mask="00/00/0000"
           placeholder="dd/mm/aaaa"
           type="text"
+          inputmode="numeric"
           formControlName="data"
-          dropcharacterspecial="false"
         />
+        <mat-hint>Formato dd/mm/aaaa</mat-hint>
+        @if (form.controls['data'].hasError('required')) {
+        <mat-error>Informe a data.</mat-error>
+        } @else if (form.controls['data'].hasError('dataFutura')) {
+        <mat-error>A data não pode estar no futuro.</mat-error>
+        } @else if (form.controls['data'].invalid) {
+        <mat-error>Data inválida. Use dd/mm/aaaa.</mat-error>
+        }
       </mat-form-field>
     </div>
     <div class="pt-2 px-4 flex flex-col">
       <button
         mat-raised-button
-        color="green"
+        type="button"
         (click)="fileInput.click()"
-        class="mr-auto !bg-green-600"
+        class="mr-auto !bg-green-700"
+        aria-describedby="dica-imagens"
       >
-        <mat-icon [ngStyle]="{ color: 'white' }">cloud_upload</mat-icon>
-        <div class="text-white">Enviar Imagem</div>
+        <mat-icon class="!text-white">cloud_upload</mat-icon>
+        <span class="text-white">Enviar Imagem</span>
       </button>
-      <mat-hint class="text-xs">PNG, JPG, JPEG - 3MB!</mat-hint>
+      <div id="dica-imagens" class="text-xs text-gray-700 mt-1">
+        PNG ou JPG, até 3 MB cada.
+      </div>
 
       <input
         #fileInput
         type="file"
         (change)="onFilesSelected($event)"
-        style="display: none"
-        accept="image/*"
+        class="hidden"
+        accept="image/png,image/jpeg"
+        tabindex="-1"
+        aria-hidden="true"
         multiple
       />
     </div>
@@ -47,17 +82,28 @@
     <div class="pt-2 px-4">
       @if (imagens().length) {
       <div>
-        <h3>Imagens Salvas:</h3>
-        <div class="flex flex-wrap gap-2">
+        <h3 class="font-semibold mb-1">Imagens selecionadas:</h3>
+        <ul class="flex flex-wrap gap-2" role="list">
           @for (imagem of imagens(); track imagem.arquivo; let i = $index) {
-          <div class="relative">
+          <li class="relative">
             @if (imagem.preview) {
-            <img [src]="imagem.preview" alt="Imagem {{ i + 1 }}" width="200" />
+            <img
+              [src]="imagem.preview"
+              [alt]="'Imagem ' + (i + 1) + ': ' + imagem.arquivo.name"
+              width="200"
+            />
             }
-            <button (click)="removeImage(i)" class="delete-btn">X</button>
-          </div>
+            <button
+              type="button"
+              (click)="removeImage(i)"
+              class="delete-btn"
+              [attr.aria-label]="'Remover imagem ' + (i + 1) + ': ' + imagem.arquivo.name"
+            >
+              <span aria-hidden="true">X</span>
+            </button>
+          </li>
           }
-        </div>
+        </ul>
       </div>
       }
     </div>
@@ -65,8 +111,15 @@
 </mat-dialog-content>
 
 <div mat-dialog-actions class="flex w-full justify-between">
-  <button mat-raised-button (click)="onClose()" class="ml-auto">Fechar</button>
-  <button mat-raised-button (click)="onSend()" class="ml-auto !bg-green-600">
-    <div class="text-white">Enviar</div>
+  <button mat-raised-button type="button" (click)="onClose()" class="ml-auto">
+    Fechar
+  </button>
+  <button
+    mat-raised-button
+    type="submit"
+    form="form-informacao"
+    class="ml-auto !bg-green-700"
+  >
+    <span class="text-white">Enviar</span>
   </button>
 </div>

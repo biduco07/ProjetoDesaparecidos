@@ -1,9 +1,18 @@
+<a
+  href="#conteudo"
+  class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg"
+  (click)="pularParaConteudo($event)"
+>
+  Pular para o conteúdo
+</a>
 <div
   class="w-full poppins-regular"
   style="text-align: -webkit-center !important"
 >
-  <div class="bg-gray-700 text-white self-center">
-    <div class="max-w-7/10 mb-4 flex p-5 justify-between w-full">
+  <header class="bg-gray-700 text-white self-center">
+    <div
+      class="md:max-w-7/10 mb-4 flex flex-wrap gap-3 p-5 justify-between w-full"
+    >
       <div class="flex gap-3">
         <button
           type="button"
@@ -14,20 +23,20 @@
           <img
             class="font-bold"
             width="100"
-            height="auto"
+            height="71"
             src="./assets/brasao.png"
-            alt="Brasão da Polícia Judiciária Civil de Mato Grosso"
+            alt=""
           />
         </button>
-        <span class="text-xl w-60 self-center">
+        <span class="text-xl max-w-60 self-center">
           Polícia Judiciária Civil Estado de Mato Grosso
         </span>
       </div>
 
-      <span class="text-3xl self-center"> Desaparecidos </span>
+      <h1 class="text-3xl self-center">Desaparecidos</h1>
     </div>
-  </div>
-  <div class="max-w-7/10">
+  </header>
+  <main #conteudo id="conteudo" tabindex="-1" class="px-3 md:px-0 md:max-w-7/10 outline-none">
     <router-outlet></router-outlet>
-  </div>
+  </main>
 </div>
