@@ -6,8 +6,7 @@ import { DesaparecidosState } from './state/desaparecidos.state';
 import { IEstatisticas } from './models/estatisticas.model';
 import { ResultadoPaginado } from '../../shared/paginacao/resultado-paginado';
 import { IPessoas } from './models/pessoas.model';
-import { PageEvent } from '@angular/material/paginator';
-import { Paginacao } from '../../shared/paginacao/paginacao';
+import { MudancaDePagina, Paginacao } from '../../shared/paginacao/paginacao';
 import { AlertService } from '../../core/alert.service';
 import { IConsulta } from './models/consulta.model';
 import { Router } from '@angular/router';
@@ -138,10 +137,10 @@ export class DesaparecidosFacade {
     this.carregarDetalhe(this._state.idDetalhe);
   }
 
-  handlePagination(event: PageEvent): void {
+  handlePagination(evento: MudancaDePagina): void {
     this._state.controlePaginacao = {
       ...this._state.controlePaginacao,
-      page: event.pageIndex,
+      page: evento.pagina,
     };
     this.consultarDesaparecidos();
   }

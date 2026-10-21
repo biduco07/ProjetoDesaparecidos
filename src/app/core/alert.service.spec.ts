@@ -1,37 +1,74 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
-import { AlertService } from './alert.service';
+import { AlertService, NOTIFICADOR } from './alert.service';
 
 describe('AlertService', () => {
-  let service: AlertService;
-  let snackBar: { open: ReturnType<typeof vi.fn> };
+  let notificador: {
+    success: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+  };
+  let anunciador: { announce: ReturnType<typeof vi.fn> };
 
-  beforeEach(() => {
-    snackBar = { open: vi.fn() };
+  function criar(plataforma = 'browser'): AlertService {
+    notificador = { success: vi.fn(), error: vi.fn() };
+    anunciador = { announce: vi.fn().mockResolvedValue(undefined) };
     TestBed.configureTestingModule({
-      providers: [{ provide: MatSnackBar, useValue: snackBar }],
+      providers: [
+        { provide: NOTIFICADOR, useValue: notificador },
+        { provide: LiveAnnouncer, useValue: anunciador },
+        { provide: PLATFORM_ID, useValue: plataforma },
+      ],
     });
-    service = TestBed.inject(AlertService);
-  });
+    return TestBed.inject(AlertService);
+  }
 
-  it('mostra a mensagem de sucesso com o estilo de sucesso', () => {
-    service.showSuccess('Enviado');
+  it('mostra o sucesso pelo toast.success, com o botão "Fechar"', () => {
+    criar().showSuccess('Enviado');
 
-    expect(snackBar.open).toHaveBeenCalledWith(
+    expect(notificador.success).toHaveBeenCalledWith(
       'Enviado',
-      'Fechar',
-      expect.objectContaining({ panelClass: ['success-snackbar'] })
+      expect.objectContaining({
+        action: expect.objectContaining({ label: 'Fechar' }),
+      })
     );
+    expect(notificador.error).not.toHaveBeenCalled();
   });
 
-  it('mostra a mensagem de erro com o estilo de erro', () => {
-    service.showError('Falhou');
+  it('mostra o erro pelo toast.error, com o botão "Fechar"', () => {
+    criar().showError('Falhou');
 
-    expect(snackBar.open).toHaveBeenCalledWith(
+    expect(notificador.error).toHaveBeenCalledWith(
       'Falhou',
-      'Fechar',
-      expect.objectContaining({ panelClass: ['error-snackbar'] })
+      expect.objectContaining({
+        action: expect.objectContaining({ label: 'Fechar' }),
+      })
     );
+    expect(notificador.success).not.toHaveBeenCalled();
+  });
+
+  // A região do sonner nasce já com o texto (no primeiro aviso, e dentro do
+  // @defer), e vários leitores de tela não anunciam região que nasce com
+  // conteúdo. O LiveAnnouncer usa uma região aria-live que já existe.
+  it('anuncia o sucesso ao leitor de tela de forma educada (polite)', () => {
+    criar().showSuccess('Enviado');
+
+    expect(anunciador.announce).toHaveBeenCalledWith('Enviado', 'polite');
+  });
+
+  it('anuncia o erro ao leitor de tela na hora (assertive)', () => {
+    criar().showError('Falhou');
+
+    expect(anunciador.announce).toHaveBeenCalledWith('Falhou', 'assertive');
+  });
+
+  it('no servidor não anuncia nada', () => {
+    const alerta = criar('server');
+
+    alerta.showSuccess('Enviado');
+    alerta.showError('Falhou');
+
+    expect(anunciador.announce).not.toHaveBeenCalled();
   });
 });

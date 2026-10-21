@@ -1,42 +1,30 @@
-@import "tailwindcss" source(".");
+/*
+ * Ordem do docs/como-usar.md do nuvy-ui (tema NuvyTech para spartan/ui).
+ * source(none) + @source: o Tailwind só procura classes no app (src/) e nos
+ * componentes da spartan (libs/ui/), sem os testes. A pasta docs/ (build do
+ * GitHub Pages, versionada) fica de fora.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import '@spartan-ng/brain/hlm-tailwind-preset.css';
+/* Sem o Material, o CDK precisa do próprio CSS para esconder o texto do LiveAnnouncer
+   (cdk-visually-hidden); sem ele, cada aviso anunciado aparece no fim da página. */
+@import '@angular/cdk/a11y-prebuilt.css';
+@import '@fontsource-variable/inter';
+@import './styles/nuvy-tema.css';
 
-/* Estilos globais da aplicação */
+@source "./";
+/* Testes fora da varredura: uma cor fixa citada num comentário de spec ou do
+   src/testing/ iria parar no CSS de produção. */
+@source not "./testing";
+@source not "./**/*.spec.ts";
+@source "../libs/ui";
+
+/* Estilos globais da aplicação (cores, fonte e foco vêm do nuvy-tema.css) */
 
 html,
 body {
   height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-/*
- * Ajustes de contraste do tema indigo-pink (WCAG 2.1 AA, 4,5:1):
- * o vermelho de erro padrão (#f44336) e o cinza dos rótulos ficam abaixo do
- * mínimo sobre fundo branco/cinza. Usa os tokens do próprio Material.
- */
-html {
-  --mat-form-field-outlined-label-text-color: rgba(0, 0, 0, 0.66);
-  --mat-form-field-filled-label-text-color: rgba(0, 0, 0, 0.66);
-  --mat-form-field-error-text-color: #b91c1c;
-  --mat-form-field-outlined-error-label-text-color: #b91c1c;
-  --mat-form-field-outlined-error-hover-label-text-color: #b91c1c;
-  --mat-form-field-outlined-error-focus-label-text-color: #b91c1c;
-  --mat-form-field-outlined-error-outline-color: #b91c1c;
-  --mat-form-field-outlined-error-hover-outline-color: #b91c1c;
-  --mat-form-field-outlined-error-focus-outline-color: #b91c1c;
-  --mat-form-field-outlined-error-caret-color: #b91c1c;
-}
-
-/*
- * O .mat-typography (CSS sem camada) estiliza h1–h3 e venceria as classes
- * do Tailwind (que ficam em @layer). revert-layer devolve esses títulos ao
- * Tailwind, para a semântica dos títulos não mudar o visual.
- */
-.mat-typography :is(h1, h2, h3):not(.mat-mdc-dialog-title) {
-  font: revert-layer;
-  letter-spacing: revert-layer;
-  margin: revert-layer;
 }

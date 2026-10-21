@@ -1,142 +1,141 @@
 <section
   aria-label="Totalizadores"
-  class="flex flex-row flex-wrap gap-x-6 justify-evenly py-3 pb-5"
+  class="flex flex-row flex-wrap justify-evenly gap-x-6 gap-y-2 pb-5"
 >
   @if (localizadosDesaparecidos(); as totais) {
   <div class="text-xl">
-    Desaparecidos: {{ totais.quantPessoasDesaparecidas }}
+    <span class="text-muted-foreground">Desaparecidos: </span><strong class="font-semibold">{{ totais.quantPessoasDesaparecidas }}</strong>
   </div>
-  <div class="text-xl">Localizados: {{ totais.quantPessoasEncontradas }}</div>
+  <div class="text-xl">
+    <span class="text-muted-foreground">Localizados: </span><strong class="font-semibold">{{ totais.quantPessoasEncontradas }}</strong>
+  </div>
   }
 </section>
 <hr class="pb-5" />
-<div class="flex flex-col md:flex-row">
-  <div class="w-full md:w-3/12 rounded-t-lg">
-    <h2
-      id="titulo-consulta"
-      class="bg-gray-600 text-white py-2 text-2xl rounded-t-lg justify-normal"
-    >
-      Consulta
-    </h2>
-    <form
-      [formGroup]="form"
-      role="search"
-      aria-labelledby="titulo-consulta"
-      class="bg-gray-200 gap-2 h-full"
-      (ngSubmit)="consultarDesaparecidos()"
-    >
-      <div class="pt-2 px-4">
-        <label for="filtro-nome" class="block text-left">Nome</label>
-        <mat-form-field class="w-full" appearance="outline">
+<div class="flex flex-col gap-4 md:flex-row">
+  <section hlmCard class="h-fit w-full md:w-3/12" aria-labelledby="titulo-consulta">
+    <div hlmCardHeader>
+      <h2 hlmCardTitle id="titulo-consulta" class="text-xl">Consulta</h2>
+    </div>
+    <div hlmCardContent>
+      <form
+        [formGroup]="form"
+        role="search"
+        aria-labelledby="titulo-consulta"
+        class="flex flex-col gap-5"
+        (ngSubmit)="consultarDesaparecidos()"
+      >
+        <div hlmField>
+          <label hlmFieldLabel for="filtro-nome">Nome</label>
           <input
-            matInput
+            hlmInput
             id="filtro-nome"
             type="text"
             formControlName="nome"
             autocomplete="off"
-            class="!uppercase"
+            class="uppercase"
           />
-        </mat-form-field>
-      </div>
+        </div>
 
-      <div class="px-4" role="group" aria-labelledby="filtro-idade">
-        <span id="filtro-idade" class="block text-left mb-2">Faixa Etária</span>
-        <mat-form-field class="w-full" appearance="outline">
-          <mat-label>Idade mínima</mat-label>
-          <input
-            matInput
-            type="number"
-            inputmode="numeric"
-            formControlName="faixaIdadeInicial"
-            min="0"
-          />
-        </mat-form-field>
-        <mat-form-field class="w-full" appearance="outline">
-          <mat-label>Idade máxima</mat-label>
-          <input
-            matInput
-            type="number"
-            inputmode="numeric"
-            formControlName="faixaIdadeFinal"
-            min="0"
-          />
-        </mat-form-field>
-      </div>
+        <fieldset hlmFieldSet class="gap-3">
+          <legend hlmFieldLegend variant="label" class="mb-2">Faixa etária</legend>
+          <div class="grid grid-cols-2 gap-3">
+            <div hlmField>
+              <label hlmFieldLabel for="filtro-idade-minima">Idade mínima</label>
+              <input
+                hlmInput
+                id="filtro-idade-minima"
+                type="number"
+                inputmode="numeric"
+                formControlName="faixaIdadeInicial"
+                min="0"
+              />
+            </div>
+            <div hlmField>
+              <label hlmFieldLabel for="filtro-idade-maxima">Idade máxima</label>
+              <input
+                hlmInput
+                id="filtro-idade-maxima"
+                type="number"
+                inputmode="numeric"
+                formControlName="faixaIdadeFinal"
+                min="0"
+              />
+            </div>
+          </div>
+        </fieldset>
 
-      <div class="px-4">
-        <p id="filtro-sexo" class="text-left">Sexo</p>
-        <mat-radio-group
-          aria-labelledby="filtro-sexo"
-          class="flex flex-col text-start"
-          formControlName="sexo"
-        >
-          <mat-radio-button value="MASCULINO">Masculino</mat-radio-button>
-          <mat-radio-button value="FEMININO">Feminino</mat-radio-button>
-        </mat-radio-group>
-      </div>
-      <div class="px-4 mt-2">
-        <p id="filtro-status" class="text-left">Status</p>
-        <mat-radio-group
-          aria-labelledby="filtro-status"
-          class="flex flex-col text-start"
-          formControlName="status"
-        >
-          <mat-radio-button value="DESAPARECIDO">Desaparecido</mat-radio-button>
-          <mat-radio-button value="LOCALIZADO">Localizado</mat-radio-button>
-        </mat-radio-group>
-      </div>
-      <div class="flex flex-col w-6/8 gap-3 mt-6 pb-6">
-        <button mat-raised-button type="submit" class="!bg-green-700">
-          <mat-icon class="size-10 !text-white">search</mat-icon>
-          <span class="!text-white"> Consultar </span>
-        </button>
+        <div class="flex flex-col gap-3">
+          <span id="filtro-sexo" class="text-sm font-medium">Sexo</span>
+          <hlm-radio-group aria-labelledby="filtro-sexo" formControlName="sexo">
+            @for (opcao of opcoesDeSexo; track opcao.valor) {
+            <div class="flex items-center gap-3">
+              <hlm-radio [value]="opcao.valor" [inputId]="'filtro-sexo-' + opcao.id">
+                <hlm-radio-indicator indicator />
+              </hlm-radio>
+              <label hlmLabel [for]="'filtro-sexo-' + opcao.id">{{ opcao.rotulo }}</label>
+            </div>
+            }
+          </hlm-radio-group>
+        </div>
 
-        <button
-          mat-raised-button
-          type="button"
-          class="!bg-red-700"
-          (click)="resetForm()"
-        >
-          <mat-icon class="size-10 !text-white">close</mat-icon>
-          <span class="!text-white"> Limpar </span>
-        </button>
-      </div>
-    </form>
-  </div>
+        <div class="flex flex-col gap-3">
+          <span id="filtro-status" class="text-sm font-medium">Status</span>
+          <hlm-radio-group aria-labelledby="filtro-status" formControlName="status">
+            @for (opcao of opcoesDeStatus; track opcao.valor) {
+            <div class="flex items-center gap-3">
+              <hlm-radio [value]="opcao.valor" [inputId]="'filtro-status-' + opcao.id">
+                <hlm-radio-indicator indicator />
+              </hlm-radio>
+              <label hlmLabel [for]="'filtro-status-' + opcao.id">{{ opcao.rotulo }}</label>
+            </div>
+            }
+          </hlm-radio-group>
+        </div>
 
-  <section aria-labelledby="titulo-resultados" class="w-full md:w-9/12 px-2">
+        <div class="flex flex-col gap-2 pt-1">
+          <button hlmBtn type="submit">
+            <ng-icon name="lucideSearch" aria-hidden="true" />
+            Consultar
+          </button>
+          <button hlmBtn variant="outline" type="button" (click)="resetForm()">
+            <ng-icon name="lucideX" aria-hidden="true" />
+            Limpar
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section aria-labelledby="titulo-resultados" class="w-full md:w-9/12">
     <h2 id="titulo-resultados" class="sr-only">Resultados</h2>
     <!-- Anuncia ao leitor de tela quando uma consulta termina. -->
     <p id="resumo-resultados" class="sr-only" aria-live="polite" aria-atomic="true">
       {{ resumoResultados() }}
     </p>
     @if (erroConsulta(); as erro) {
-    <div
-      role="alert"
-      class="flex flex-col items-center gap-3 rounded-lg border border-red-300 bg-red-50 p-6 text-red-800"
-    >
-      <mat-icon aria-hidden="true">error_outline</mat-icon>
-      <p>{{ erro }}</p>
-      <button mat-raised-button type="button" (click)="tentarNovamente()">
-        <mat-icon>refresh</mat-icon>
-        Tentar de novo
-      </button>
+    <div hlmAlert variant="destructive" class="items-start">
+      <ng-icon name="lucideCircleAlert" aria-hidden="true" />
+      <p hlmAlertDescription>{{ erro }}</p>
+      <div class="col-start-2 mt-3">
+        <button hlmBtn variant="outline" type="button" (click)="tentarNovamente()">
+          <ng-icon name="lucideRefreshCw" aria-hidden="true" />
+          Tentar de novo
+        </button>
+      </div>
     </div>
     } @else if (listaPessoas(); as pagina) { @if (pagina.content?.length) {
-    <ul
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3 md:mt-0"
-      role="list"
-    >
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" role="list">
       @for (lista of pagina.content; track lista.id) {
       <li class="flex">
         <!--
-          O card inteiro é clicável, mas quem recebe o foco e o Enter é o botão
-          com o nome (o ::after dele cobre o card), para o teclado e o leitor
+          O cartão inteiro é clicável, mas quem recebe o foco e o Enter é o botão
+          com o nome (o ::after dele cobre o cartão), para o teclado e o leitor
           de tela encontrarem cada pessoa.
         -->
-        <mat-card
-          class="relative w-full focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-blue-700"
-          appearance="outlined"
+        <article
+          hlmCard
+          class="relative w-full gap-3 pb-4 transition-shadow hover:ring-foreground/30 focus-within:ring-2 focus-within:ring-ring"
         >
           <img
             [src]="lista.urlFoto || './assets/semfoto.jpg'"
@@ -144,24 +143,24 @@
             width="300"
             height="240"
             loading="lazy"
-            class="w-full h-60 object-cover p-2 rounded-t-lg"
+            class="h-60 w-full object-cover"
           />
-          <mat-card-content>
+          <div hlmCardContent class="flex flex-col gap-1">
             <h3>
               <button
                 type="button"
-                class="cursor-pointer text-sm font-medium after:absolute after:inset-0 after:content-[''] focus:outline-none"
+                class="text-left text-base font-semibold after:absolute after:inset-0 after:content-[''] focus:outline-none"
                 (click)="abrirDetalhes(lista.id)"
               >
                 {{ lista.nome }}
               </button>
             </h3>
-            <div class="text-gray-700 text-sm">
+            <div class="text-muted-foreground">
               {{ lista.idade }} Anos, {{ lista.sexo }}
             </div>
-            <dl class="mt-2 text-left">
+            <dl class="mt-1">
               <div>
-                <dt class="inline font-semibold">Data:</dt>
+                <dt class="inline font-medium">Data:</dt>
                 <dd class="inline">
                   {{
                     lista.ultimaOcorrencia?.dtDesaparecimento
@@ -170,36 +169,31 @@
                 </dd>
               </div>
               <div>
-                <dt class="inline font-semibold">Local:</dt>
+                <dt class="inline font-medium">Local:</dt>
                 <dd class="inline">
                   {{ lista.ultimaOcorrencia?.localDesaparecimentoConcat }}
                 </dd>
               </div>
             </dl>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </article>
       </li>
       }
     </ul>
     } @else {
-    <p class="py-10 text-lg">
+    <p class="py-10 text-center text-lg text-muted-foreground">
       Nenhuma pessoa encontrada com esses filtros.
     </p>
     }
-    <mat-paginator
-      class="w-full"
-      [pageIndex]="paginacao().page"
-      [pageSize]="paginacao().size"
-      [hidePageSize]="true"
-      (page)="handlePagination($event)"
-      [length]="pagina.totalElements"
-    ></mat-paginator>
-    } @else{
-    <div class="spinner-container">
-      <mat-spinner
-        diameter="50"
-        aria-label="Carregando a lista de pessoas"
-      ></mat-spinner>
+    <app-paginador
+      [pagina]="paginacao().page"
+      [tamanho]="paginacao().size"
+      [total]="pagina.totalElements ?? 0"
+      (mudouPagina)="handlePagination($event)"
+    />
+    } @else {
+    <div class="flex justify-center py-16">
+      <hlm-spinner aria-label="Carregando a lista de pessoas" class="text-3xl" />
     </div>
     }
   </section>

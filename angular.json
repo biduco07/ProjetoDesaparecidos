@@ -34,7 +34,6 @@
               }
             ],
             "styles": [
-              "src/material-theme.scss",
               "src/styles.css"
             ],
             "scripts": [],
@@ -53,7 +52,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumError": "550kB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -86,7 +85,6 @@
               "optimization": false,
               "extractLicenses": false,
               "styles": [
-                "@angular/material/prebuilt-themes/azure-blue.css",
                 "src/styles.css"
               ],
               "polyfills": [
@@ -127,7 +125,8 @@
               "text-summary"
             ],
             "buildTarget": ":build:testing",
-            "runner": "vitest"
+            "runner": "vitest",
+            "setupFiles": ["src/test-setup.ts"]
           }
         },
         "lint": {

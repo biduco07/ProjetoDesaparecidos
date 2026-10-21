@@ -1,70 +1,65 @@
 @if (erro(); as mensagem) {
-<div
-  role="alert"
-  class="mt-3 flex flex-col items-center gap-3 rounded-lg border border-red-300 bg-red-50 p-6 text-red-800"
->
-  <mat-icon aria-hidden="true">error_outline</mat-icon>
-  <p>{{ mensagem }}</p>
-  <button mat-raised-button type="button" (click)="tentarNovamente()">
-    <mat-icon>refresh</mat-icon>
-    Tentar de novo
-  </button>
+<div hlmAlert variant="destructive" class="mt-3">
+  <ng-icon name="lucideCircleAlert" aria-hidden="true" />
+  <p hlmAlertDescription>{{ mensagem }}</p>
+  <div class="col-start-2 mt-3">
+    <button hlmBtn variant="outline" type="button" (click)="tentarNovamente()">
+      <ng-icon name="lucideRefreshCw" aria-hidden="true" />
+      Tentar de novo
+    </button>
+  </div>
 </div>
 } @else if (pessoa(); as pessoa) {
-<div class="text-left">
-  <button mat-button type="button" class="mt-1" (click)="voltar()">
-    <mat-icon>arrow_back</mat-icon>
+<div class="pb-3">
+  <button hlmBtn variant="ghost" type="button" (click)="voltar()">
+    <ng-icon name="lucideArrowLeft" aria-hidden="true" />
     Voltar para a lista
   </button>
 </div>
-@if (pessoa.ultimaOcorrencia?.dataLocalizacao) {
-<span class="bg-green-700 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
-  >Localizado</span
+@let localizado = !!pessoa.ultimaOcorrencia?.dataLocalizacao;
+<!-- Aba com a situação, colada no cartão, e borda do cartão na mesma cor. -->
+<span
+  class="inline-block rounded-t-lg px-3 pt-1 text-2xl font-semibold"
+  [ngClass]="
+    localizado
+      ? 'bg-success text-success-foreground'
+      : 'bg-destructive text-destructive-foreground'
+  "
+  >{{ localizado ? "Localizado" : "Desaparecido" }}</span
 >
-} @else{
-<span class="bg-red-600 pt-1 px-2 text-white text-3xl mt-3 rounded-t-lg"
-  >Desaparecido</span
->
-}
 
 <div
-  [ngClass]="
-    pessoa.ultimaOcorrencia?.dataLocalizacao
-      ? 'border-green-700'
-      : 'border-red-600'
-  "
-  class="flex flex-col md:flex-row py-2 border-4 rounded-lg px-2"
+  hlmCard
+  class="flex flex-col gap-4 rounded-tl-none border-4 p-4 ring-0 md:flex-row"
+  [ngClass]="localizado ? 'border-success' : 'border-destructive'"
 >
-  <div>
-    <img
-      [src]="pessoa.urlFoto || './assets/semfoto.jpg'"
-      [alt]="'Foto de ' + pessoa.nome"
-      width="512"
-      height="480"
-      class="w-full h-80 md:h-120 object-cover p-2 max-w-lg"
-    />
-  </div>
-  <div class="flex flex-col text-left mt-1">
-    <h2 class="font-semibold text-2xl">{{ pessoa.nome }}</h2>
-    <div class="font-semibold text-xl">
+  <img
+    [src]="pessoa.urlFoto || './assets/semfoto.jpg'"
+    [alt]="'Foto de ' + pessoa.nome"
+    width="512"
+    height="480"
+    class="h-80 w-full max-w-lg rounded-lg object-cover md:h-120"
+  />
+  <div class="flex flex-col gap-2">
+    <h2 class="text-2xl font-semibold">{{ pessoa.nome }}</h2>
+    <div class="text-xl text-muted-foreground">
       {{ pessoa.idade }} Anos - {{ pessoa.sexo }}
     </div>
     <hr class="my-2" />
 
-    <h3 class="font-semibold text-xl my-2">Dados sobre o Desaparecimento</h3>
-    @if(pessoa.ultimaOcorrencia?.dataLocalizacao){
-    <div class="flex flex-row">
+    <h3 class="text-xl font-semibold">Dados sobre o Desaparecimento</h3>
+    @if (localizado) {
+    <div>
       <span class="pr-1 font-semibold">Data Localizado:</span>
       {{ pessoa.ultimaOcorrencia?.dataLocalizacao | date : "dd/MM/yyyy " }}
     </div>
 
-    <div class="flex flex-row">
+    <div>
       <span class="pr-1 font-semibold">Encontrado Vivo?</span>
       {{ pessoa.ultimaOcorrencia?.encontradoVivo ? "Sim" : "Não" }}
     </div>
     } @else {
-
-    <div class="flex flex-row">
+    <div>
       <span class="pr-1 font-semibold">Data:</span>
       {{
         pessoa.ultimaOcorrencia?.dtDesaparecimento
@@ -72,46 +67,36 @@
       }}
     </div>
 
-    <div class="flex flex-row">
+    <div>
       <span class="pr-1 font-semibold">Local:</span>
       {{ pessoa.ultimaOcorrencia?.localDesaparecimentoConcat }}
     </div>
-    @if(pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
-    ?.vestimentasDesaparecido){
-    <div class="flex flex-row">
+    @if (pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.vestimentasDesaparecido) {
+    <div>
       <span class="pr-1 font-semibold">Vestimenta:</span>
       {{
         pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO
           ?.vestimentasDesaparecido
       }}
     </div>
-    } @if(pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao){
-
-    <div class="flex flex-row">
+    } @if (pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao) {
+    <div>
       <span class="pr-1 font-semibold">Informações:</span>
       {{ pessoa.ultimaOcorrencia?.ocorrenciaEntrevDesapDTO?.informacao }}
     </div>
     }
-    <div class="py-2 font-bold text-xl text-red-700">
+    <div class="py-2 text-xl font-bold text-destructive">
       Desaparecido Há {{ dataPercorrida() }} Dias.
     </div>
-    <button
-      type="button"
-      class="!bg-red-700 w-60 py-3"
-      (click)="openDialog()"
-      mat-raised-button
-    >
-      <span class="text-white">Encontrou Essa Pessoa?</span>
+    <button hlmBtn size="lg" type="button" class="w-fit px-6" (click)="openDialog()">
+      <ng-icon name="lucideMessageSquareText" aria-hidden="true" />
+      Encontrou Essa Pessoa?
     </button>
-
     }
   </div>
 </div>
 } @else {
-<div class="flex justify-center py-10">
-  <mat-spinner
-    diameter="50"
-    aria-label="Carregando os dados da pessoa"
-  ></mat-spinner>
+<div class="flex justify-center py-16">
+  <hlm-spinner aria-label="Carregando os dados da pessoa" class="text-3xl" />
 </div>
 }

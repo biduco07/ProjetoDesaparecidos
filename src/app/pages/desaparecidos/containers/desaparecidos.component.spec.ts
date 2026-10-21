@@ -8,6 +8,7 @@ import { IPessoas } from '../models/pessoas.model';
 import { IConsulta } from '../models/consulta.model';
 import { ResultadoPaginado } from '../../../shared/paginacao/resultado-paginado';
 import { Paginacao } from '../../../shared/paginacao/paginacao';
+import { classesDeCorFixa } from '../../../../testing/cores-fixas';
 
 function criarFacadeFake() {
   return {
@@ -106,7 +107,7 @@ describe('DesaparecidosComponent', () => {
     });
 
     it('renderiza um item de lista com botão por pessoa', () => {
-      const botoes = elemento().querySelectorAll('li mat-card h3 button');
+      const botoes = elemento().querySelectorAll('li [data-slot="card"] h3 button');
       expect(Array.from(botoes).map((b) => b.textContent?.trim())).toEqual([
         'MARIA',
         'JOÃO',
@@ -117,7 +118,7 @@ describe('DesaparecidosComponent', () => {
 
     it('abre o detalhe pelo botão do card (teclado e clique)', () => {
       elemento()
-        .querySelectorAll<HTMLButtonElement>('li mat-card h3 button')[1]
+        .querySelectorAll<HTMLButtonElement>('li [data-slot="card"] h3 button')[1]
         .click();
 
       expect(facade.getIdDetalhes).toHaveBeenCalledWith(2);
@@ -139,23 +140,27 @@ describe('DesaparecidosComponent', () => {
       expect(component.resumoResultados()).toBe('Nenhuma pessoa encontrada.');
     });
 
-    it('usa os textos do paginador em português', () => {
-      expect(elemento().querySelector('mat-paginator')?.textContent).toContain(
-        '1 – 12 de 25'
-      );
+    it('usa o paginador próprio, em português', () => {
+      const paginador = elemento().querySelector('app-paginador');
+      expect(paginador?.textContent).toContain('1 – 12 de 25');
       expect(
-        elemento()
-          .querySelector('.mat-mdc-paginator-navigation-next')
-          ?.getAttribute('aria-label')
-      ).toBe('Próxima página');
+        paginador?.querySelector('button[aria-label="Próxima página"]')
+      ).not.toBeNull();
     });
 
     it('repassa a troca de página para a facade', () => {
-      component.handlePagination({ pageIndex: 1, pageSize: 12, length: 25 });
+      elemento()
+        .querySelector<HTMLButtonElement>('app-paginador button[aria-label="Página 2"]')
+        ?.click();
 
-      expect(facade.handlePagination).toHaveBeenCalledWith(
-        expect.objectContaining({ pageIndex: 1 })
-      );
+      expect(facade.handlePagination).toHaveBeenCalledWith({
+        pagina: 1,
+        tamanho: 12,
+      });
+    });
+
+    it('não usa cores fixas do Tailwind', () => {
+      expect(classesDeCorFixa(elemento())).toEqual([]);
     });
   });
 
@@ -198,11 +203,42 @@ describe('DesaparecidosComponent', () => {
 
     it('associa cada campo a um rótulo', () => {
       const el = fixture.nativeElement as HTMLElement;
-      expect(el.querySelector('label[for="filtro-nome"]')).not.toBeNull();
-      expect(el.querySelector('#filtro-nome')).not.toBeNull();
-      el.querySelectorAll('mat-radio-group').forEach((grupo) =>
-        expect(grupo.getAttribute('aria-labelledby')).toMatch(/^filtro-/)
-      );
+      for (const id of ['filtro-nome', 'filtro-idade-minima', 'filtro-idade-maxima']) {
+        expect(el.querySelector(`label[for="${id}"]`)).not.toBeNull();
+        expect(el.querySelector(`input#${id}`)).not.toBeNull();
+      }
+      const grupos = el.querySelectorAll('hlm-radio-group');
+      expect(grupos.length).toBe(2);
+      grupos.forEach((grupo) => {
+        const titulo = grupo.getAttribute('aria-labelledby') ?? '';
+        expect(titulo).toMatch(/^filtro-/);
+        expect(el.querySelector(`#${titulo}`)).not.toBeNull();
+      });
+    });
+
+    it('agrupa a faixa etária num fieldset com legenda', () => {
+      const legenda = form().querySelector('fieldset > legend');
+      expect(legenda?.textContent?.trim()).toBe('Faixa etária');
+      expect(legenda?.parentElement?.querySelectorAll('input').length).toBe(2);
+    });
+
+    it('o rádio altera o formulário (e o rótulo é clicável)', () => {
+      form().querySelector<HTMLLabelElement>('label[for="filtro-sexo-feminino"]')?.click();
+      fixture.detectChanges();
+
+      expect(component.form.value.sexo).toBe('FEMININO');
+      expect(
+        form().querySelector<HTMLInputElement>('input#filtro-sexo-feminino')?.checked
+      ).toBe(true);
+    });
+
+    it('mostra no rádio o filtro salvo no state', () => {
+      facade.formularioConsulta$.next({ status: 'LOCALIZADO' } as IConsulta);
+      fixture.detectChanges();
+
+      expect(
+        form().querySelector<HTMLInputElement>('input#filtro-status-localizado')?.checked
+      ).toBe(true);
     });
   });
 
@@ -231,7 +267,7 @@ describe('DesaparecidosComponent', () => {
     });
 
     it('mostra a mensagem e o botão "Tentar de novo" no lugar do spinner', () => {
-      expect(elemento().querySelector('mat-spinner')).not.toBeNull();
+      expect(elemento().querySelector('hlm-spinner')).not.toBeNull();
 
       facade.erroConsulta$.next(mensagem);
       fixture.detectChanges();
@@ -240,7 +276,8 @@ describe('DesaparecidosComponent', () => {
         mensagem
       );
       expect(botaoTentarDeNovo()).toBeDefined();
-      expect(elemento().querySelector('mat-spinner')).toBeNull();
+      expect(elemento().querySelector('hlm-spinner')).toBeNull();
+      expect(classesDeCorFixa(elemento())).toEqual([]);
     });
 
     it('pede à facade para tentar de novo ao clicar no botão', () => {

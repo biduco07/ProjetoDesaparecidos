@@ -1,125 +1,117 @@
-<h2 mat-dialog-title class="font-semibold flex text-center">
-  Enviar informações sobre {{ data.descricao }}
-</h2>
+<div hlmDialogHeader>
+  <h2 hlmDialogTitle class="pr-8 text-lg font-semibold">
+    Enviar informações sobre {{ data.descricao }}
+  </h2>
+</div>
 
-<mat-dialog-content>
-  <form
-    id="form-informacao"
-    [formGroup]="form"
-    class="gap-2 h-full"
-    novalidate
-    (ngSubmit)="onSend()"
-  >
-    <div class="pt-2 px-4">
-      <mat-form-field
-        class="w-full"
-        appearance="outline"
-        subscriptSizing="dynamic"
-      >
-        <mat-label>Informação</mat-label>
-        <textarea
-          matInput
-          formControlName="informacao"
-          rows="3"
-        ></textarea>
-        @if (form.controls['informacao'].invalid) {
-        <mat-error>Descreva o que você sabe sobre a pessoa.</mat-error>
-        }
-      </mat-form-field>
-    </div>
-    <div class="pt-2 px-4">
-      <mat-form-field
-        class="w-full sm:w-80"
-        appearance="outline"
-        subscriptSizing="dynamic"
-      >
-        <mat-label>Data em que a pessoa foi vista</mat-label>
-        <input
-          matInput
-          mask="00/00/0000"
-          placeholder="dd/mm/aaaa"
-          type="text"
-          inputmode="numeric"
-          formControlName="data"
+<form
+  id="form-informacao"
+  [formGroup]="form"
+  class="flex flex-col gap-5"
+  novalidate
+  (ngSubmit)="onSend()"
+>
+  <div hlmField>
+    <label hlmFieldLabel for="informacao">
+      Informação<span aria-hidden="true" class="text-destructive">*</span>
+    </label>
+    <textarea
+      hlmTextarea
+      id="informacao"
+      formControlName="informacao"
+      rows="3"
+      required
+    ></textarea>
+    <hlm-field-error>Descreva o que você sabe sobre a pessoa.</hlm-field-error>
+  </div>
+
+  <div hlmField class="sm:w-80">
+    <label hlmFieldLabel for="data-vista">
+      Data em que a pessoa foi vista<span aria-hidden="true" class="text-destructive">*</span>
+    </label>
+    <input
+      hlmInput
+      id="data-vista"
+      mask="00/00/0000"
+      placeholder="dd/mm/aaaa"
+      type="text"
+      inputmode="numeric"
+      formControlName="data"
+      required
+    />
+    <p hlmFieldDescription>Formato dd/mm/aaaa</p>
+    <!-- Uma mensagem por vez; a spartan liga a que estiver na tela ao campo. -->
+    @if (form.controls['data'].hasError('required')) {
+    <hlm-field-error>Informe a data.</hlm-field-error>
+    } @else if (form.controls['data'].hasError('dataFutura')) {
+    <hlm-field-error>A data não pode estar no futuro.</hlm-field-error>
+    } @else if (form.controls['data'].invalid) {
+    <hlm-field-error>Data inválida. Use dd/mm/aaaa.</hlm-field-error>
+    }
+  </div>
+
+  <div class="flex flex-col items-start gap-1.5">
+    <button
+      hlmBtn
+      variant="outline"
+      type="button"
+      (click)="fileInput.click()"
+      aria-describedby="dica-imagens"
+    >
+      <ng-icon name="lucideUpload" aria-hidden="true" />
+      Enviar Imagem
+    </button>
+    <p id="dica-imagens" class="text-sm text-muted-foreground">
+      PNG ou JPG, até 3 MB cada.
+    </p>
+
+    <input
+      #fileInput
+      type="file"
+      (change)="onFilesSelected($event)"
+      class="hidden"
+      accept="image/png,image/jpeg"
+      tabindex="-1"
+      aria-hidden="true"
+      multiple
+    />
+  </div>
+
+  @if (imagens().length) {
+  <div>
+    <h3 class="mb-2 text-sm font-medium">Imagens selecionadas:</h3>
+    <ul class="flex flex-wrap gap-2" role="list">
+      @for (imagem of imagens(); track imagem.arquivo; let i = $index) {
+      <li class="relative">
+        @if (imagem.preview) {
+        <img
+          [src]="imagem.preview"
+          [alt]="'Imagem ' + (i + 1) + ': ' + imagem.arquivo.name"
+          width="200"
+          class="rounded-md border"
         />
-        <mat-hint>Formato dd/mm/aaaa</mat-hint>
-        @if (form.controls['data'].hasError('required')) {
-        <mat-error>Informe a data.</mat-error>
-        } @else if (form.controls['data'].hasError('dataFutura')) {
-        <mat-error>A data não pode estar no futuro.</mat-error>
-        } @else if (form.controls['data'].invalid) {
-        <mat-error>Data inválida. Use dd/mm/aaaa.</mat-error>
         }
-      </mat-form-field>
-    </div>
-    <div class="pt-2 px-4 flex flex-col">
-      <button
-        mat-raised-button
-        type="button"
-        (click)="fileInput.click()"
-        class="mr-auto !bg-green-700"
-        aria-describedby="dica-imagens"
-      >
-        <mat-icon class="!text-white">cloud_upload</mat-icon>
-        <span class="text-white">Enviar Imagem</span>
-      </button>
-      <div id="dica-imagens" class="text-xs text-gray-700 mt-1">
-        PNG ou JPG, até 3 MB cada.
-      </div>
-
-      <input
-        #fileInput
-        type="file"
-        (change)="onFilesSelected($event)"
-        class="hidden"
-        accept="image/png,image/jpeg"
-        tabindex="-1"
-        aria-hidden="true"
-        multiple
-      />
-    </div>
-
-    <div class="pt-2 px-4">
-      @if (imagens().length) {
-      <div>
-        <h3 class="font-semibold mb-1">Imagens selecionadas:</h3>
-        <ul class="flex flex-wrap gap-2" role="list">
-          @for (imagem of imagens(); track imagem.arquivo; let i = $index) {
-          <li class="relative">
-            @if (imagem.preview) {
-            <img
-              [src]="imagem.preview"
-              [alt]="'Imagem ' + (i + 1) + ': ' + imagem.arquivo.name"
-              width="200"
-            />
-            }
-            <button
-              type="button"
-              (click)="removeImage(i)"
-              class="delete-btn"
-              [attr.aria-label]="'Remover imagem ' + (i + 1) + ': ' + imagem.arquivo.name"
-            >
-              <span aria-hidden="true">X</span>
-            </button>
-          </li>
-          }
-        </ul>
-      </div>
+        <!-- Fundo sólido (e não o vermelho translúcido do vega) porque fica
+             por cima da foto. -->
+        <button
+          hlmBtn
+          variant="destructive"
+          size="icon-sm"
+          type="button"
+          class="absolute top-1 right-1 rounded-full bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 dark:bg-destructive dark:hover:bg-destructive/90"
+          (click)="removeImage(i)"
+          [attr.aria-label]="'Remover imagem ' + (i + 1) + ': ' + imagem.arquivo.name"
+        >
+          <ng-icon name="lucideX" aria-hidden="true" />
+        </button>
+      </li>
       }
-    </div>
-  </form>
-</mat-dialog-content>
+    </ul>
+  </div>
+  }
+</form>
 
-<div mat-dialog-actions class="flex w-full justify-between">
-  <button mat-raised-button type="button" (click)="onClose()" class="ml-auto">
-    Fechar
-  </button>
-  <button
-    mat-raised-button
-    type="submit"
-    form="form-informacao"
-    class="ml-auto !bg-green-700"
-  >
-    <span class="text-white">Enviar</span>
-  </button>
+<div hlmDialogFooter>
+  <button hlmBtn variant="outline" type="button" (click)="onClose()">Fechar</button>
+  <button hlmBtn type="submit" form="form-informacao">Enviar</button>
 </div>

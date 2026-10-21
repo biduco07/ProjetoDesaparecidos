@@ -5,49 +5,63 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
 import {
   FormBuilder,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { DesaparecidosFacade } from '../desaparecidos.facade';
 import { DatePipe } from '@angular/common';
-import { filter } from 'rxjs';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
-  MatPaginatorIntl,
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
-import { PaginadorIntl } from '../../../shared/paginacao/paginador-intl';
+  lucideCircleAlert,
+  lucideRefreshCw,
+  lucideSearch,
+  lucideX,
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmLabelImports } from '@spartan-ng/helm/label';
+import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
+import { filter } from 'rxjs';
+import { DesaparecidosFacade } from '../desaparecidos.facade';
 import { IConsulta } from '../models/consulta.model';
+import { MudancaDePagina } from '../../../shared/paginacao/paginacao';
+import { PaginadorComponent } from '../../../shared/paginacao/paginador/paginador.component';
+
+/** Opção de um grupo de rádio dos filtros (o id compõe o id do <input>). */
+interface OpcaoDeFiltro {
+  valor: string;
+  id: string;
+  rotulo: string;
+}
+
 @Component({
   selector: 'app-desaparecidos',
   templateUrl: './desaparecidos.component.html',
-  styleUrl: './desaparecidos.component.scss',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    MatButtonModule,
-    MatInputModule,
     FormsModule,
     ReactiveFormsModule,
-    MatRadioModule,
-    MatIconModule,
-    MatCardModule,
     DatePipe,
-    MatProgressSpinnerModule,
-    MatPaginatorModule,
+    NgIcon,
+    HlmAlertImports,
+    HlmButtonImports,
+    HlmCardImports,
+    HlmFieldImports,
+    HlmInputImports,
+    HlmLabelImports,
+    HlmRadioGroupImports,
+    HlmSpinnerImports,
+    PaginadorComponent,
   ],
-  // Fica no componente (e não no app.config) para o paginador continuar
-  // fora do bundle inicial.
-  providers: [{ provide: MatPaginatorIntl, useClass: PaginadorIntl }],
+  providers: [
+    provideIcons({ lucideSearch, lucideX, lucideCircleAlert, lucideRefreshCw }),
+  ],
 })
 export class DesaparecidosComponent {
   private _facade = inject(DesaparecidosFacade);
@@ -55,6 +69,15 @@ export class DesaparecidosComponent {
 
   form!: FormGroup;
   formularioConsulta!: IConsulta;
+
+  protected readonly opcoesDeSexo: OpcaoDeFiltro[] = [
+    { valor: 'MASCULINO', id: 'masculino', rotulo: 'Masculino' },
+    { valor: 'FEMININO', id: 'feminino', rotulo: 'Feminino' },
+  ];
+  protected readonly opcoesDeStatus: OpcaoDeFiltro[] = [
+    { valor: 'DESAPARECIDO', id: 'desaparecido', rotulo: 'Desaparecido' },
+    { valor: 'LOCALIZADO', id: 'localizado', rotulo: 'Localizado' },
+  ];
 
   // toSignal() se inscreve agora e encerra a inscrição quando o componente
   // é destruído; cada nova emissão marca a view para checagem (OnPush).
@@ -123,8 +146,8 @@ export class DesaparecidosComponent {
     this._facade.getIdDetalhes(id);
   }
 
-  handlePagination(event: PageEvent): void {
-    this._facade.handlePagination(event);
+  handlePagination(evento: MudancaDePagina): void {
+    this._facade.handlePagination(evento);
   }
 
   tentarNovamente(): void {

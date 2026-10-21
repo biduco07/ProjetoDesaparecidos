@@ -2,22 +2,35 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  computed,
   inject,
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideMoon, lucideSun } from '@ng-icons/lucide';
+import { HlmToaster } from '@spartan-ng/helm/sonner';
 import { filter, skip } from 'rxjs';
+import { TemaService } from './core/tema.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  // HlmToaster direto (e não o array HlmToasterImports): o @defer só tira do
+  // bundle inicial componentes importados pela própria classe.
+  imports: [RouterOutlet, HlmToaster, NgIcon],
+  providers: [provideIcons({ lucideSun, lucideMoon })],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   private router = inject(Router);
+  protected readonly tema = inject(TemaService);
+
+  /** O botão diz o que vai fazer: no escuro oferece o claro, e vice-versa. */
+  protected readonly rotuloDoTema = computed(() =>
+    this.tema.modo() === 'escuro' ? 'Usar tema claro' : 'Usar tema escuro'
+  );
 
   title = 'ProjetoDesaparecidos';
 

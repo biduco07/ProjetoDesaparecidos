@@ -43,3 +43,6 @@ Thumbs.db
 
 # Imagens Docker exportadas (docker save)
 *.tar
+
+# Cache do Nx criado pelo @spartan-ng/cli ao gerar componentes
+/.nx

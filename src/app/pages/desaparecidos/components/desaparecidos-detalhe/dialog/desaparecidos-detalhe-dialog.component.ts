@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,17 +14,15 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideUpload, lucideX } from '@ng-icons/lucide';
+import { BrnDialogRef, injectBrnDialogContext } from '@spartan-ng/brain/dialog';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogImports } from '@spartan-ng/helm/dialog';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 import { DesaparecidosFacade } from '../../../desaparecidos.facade';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { AlertService } from '../../../../../core/alert.service';
 
@@ -73,31 +70,31 @@ export interface ImagemSelecionada {
 @Component({
   selector: 'app-desaparecidos-detalhe-dialog',
   imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatInputModule,
     FormsModule,
     ReactiveFormsModule,
-    MatIconModule,
-    MatFormFieldModule,
+    NgIcon,
+    HlmButtonImports,
+    HlmDialogImports,
+    HlmFieldImports,
+    HlmInputImports,
+    HlmTextareaImports,
     NgxMaskDirective,
   ],
-  standalone: true,
-  providers: [provideNgxMask()],
+  providers: [provideNgxMask(), provideIcons({ lucideUpload, lucideX })],
+  // O hlm-dialog-content espaça os filhos com gap-6, mas este componente entra
+  // nele como um filho só; o espaço entre título, formulário e botões fica aqui.
+  host: { class: 'flex flex-col gap-6' },
   templateUrl: './desaparecidos-detalhe-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './desaparecidos-detalhe-dialog.component.scss',
 })
 export class DesaparecidosDetalheDialogComponent {
   private _fb = inject(FormBuilder);
   private _facade = inject(DesaparecidosFacade);
   private _alert = inject(AlertService);
   private _elemento = inject<ElementRef<HTMLElement>>(ElementRef);
-  dialogRef =
-    inject<MatDialogRef<DesaparecidosDetalheDialogComponent>>(MatDialogRef);
-  data = inject<{ id: number; descricao: string }>(MAT_DIALOG_DATA);
+  dialogRef = inject(BrnDialogRef);
+  /** Ocorrência e nome da pessoa, passados pelo HlmDialogService (context). */
+  data = injectBrnDialogContext<{ id: number; descricao: string }>();
 
   form!: FormGroup;
 
